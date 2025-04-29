@@ -2,4 +2,4 @@
 title: "About"
 ---
 
-About this site
+This site is created to share insights and updates about our social data project. Stay tuned for more information and findings!
