@@ -12,5 +12,12 @@
     "title": "About",
     "section": "",
     "text": "This site is created to share insights and updates about our social data project. Stay tuned for more information and findings!"
+  },
+  {
+    "objectID": "Plots/dummyfil.html",
+    "href": "Plots/dummyfil.html",
+    "title": "Social data analysis and visualization project",
+    "section": "",
+    "text": "import pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\ndata = pd.read_csv(\"../Website/data/complete.csv\", on_bad_lines='skip')\ndata['datetime'] = pd.to_datetime(data['datetime'], errors='coerce')\ndf=data[data[\"country\"]==\"us\"].sort_index(level=\"datetime\")\ndf = df.dropna(subset=['datetime'])\ndf = df.sort_values(by='datetime').reset_index(drop=True)\ndf=df.dropna()\n\nC:\\Users\\anton\\AppData\\Local\\Temp\\ipykernel_56424\\2986948956.py:4: DtypeWarning: Columns (5,9) have mixed types. Specify dtype option on import or set low_memory=False.\n  data = pd.read_csv(\"../Website/data/complete.csv\", on_bad_lines='skip')\n\n\n\nhourtime=df[\"time\"]=df[\"datetime\"].dt.hour\nplt.hist(hourtime, bins=24, range=(0, 24), density=True, alpha=0.5, color='blue')\nplt.xlabel('Hour of the Day')\n\nText(0.5, 0, 'Hour of the Day')"
   }
 ]
