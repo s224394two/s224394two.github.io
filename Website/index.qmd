@@ -16,6 +16,13 @@ The first thing relevant to look at is the development of number of UFO sighting
 
 ```
 
+If we look at the
+```{python}
+hourtime=df["time"]=df["datetime"].dt.hour
+plt.hist(hourtime, bins=24, range=(0, 24), density=True, alpha=0.5, color='blue')
+plt.xlabel('Hour of the Day')
+```
+
 ### Heatmap 
 ```{python}
 #| error: false
