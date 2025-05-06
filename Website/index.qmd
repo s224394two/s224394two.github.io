@@ -1,6 +1,8 @@
 ---
-title: "What causes the increase in UFO sightings?"
+title: "What is the cause of the increase in UFO sightings?"
 ---
+
+![Alt text](../../../../../../c:/NoterDTU/6_semester/Socialdataprojekt2/s224394two.github.io/dummybilleder/times.png)
 
 This is a Quarto website.
 
