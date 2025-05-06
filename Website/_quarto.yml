@@ -1,6 +1,8 @@
 project:
   type: website
   output-dir: docs
+  resources:
+    - .nojekyll
 
 website:
   title: "Social data analysis and visualization project" 
