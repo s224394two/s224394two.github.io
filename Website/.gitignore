@@ -1,2 +1,4 @@
-/.quarto/
+site_libs/
 docs/site_libs/
+
+/.quarto/
