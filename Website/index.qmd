@@ -1,23 +1,39 @@
 ---
 title: "What is the cause of the increase in UFO sightings?"
+from: markdown+emoji
+format:
+  html:
+    code-fold: true
+jupyter: python3
 ---
 
 ### Heatmap 
 ```{python}
+#| error: false
+#| warning: false
+#| message: false
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-data = pd.read_csv("Plots/data/complete.csv", on_bad_lines='skip')
+data = pd.read_csv("data/complete.csv", on_bad_lines='skip')
 data['datetime'] = pd.to_datetime(data['datetime'], errors='coerce')
 df=data[data["country"]=="us"].sort_index(level="datetime")
 df = df.dropna(subset=['datetime'])
 df = df.sort_values(by='datetime').reset_index(drop=True)
 df=df.dropna()
-df
+
 from folium import plugins
 from folium.plugins import HeatMap
 import folium
 from branca.element import Template, MacroElement
+
+milbases=pd.read_csv("data/clean_military_bases.csv")
+milcomp=milbases["component"]
+letters=[i[0:2] for i in milbases["component"]]
+
+milbases=milbases[(milcomp=="AF Guard" ) |(milcomp=="AF Reserve" )| (milcomp=="AF Active")]
+
+milbasesl=milbases[["latitude","longitude"]]
 
 # Create your map
 map_hooray = folium.Map(location=[40.80887462217925, -101.64736435756755], zoom_start=4)
