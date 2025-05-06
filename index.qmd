@@ -18,9 +18,22 @@ The first thing relevant to look at is the development of number of UFO sighting
 
 If we look at the
 ```{python}
-#hourtime=df["time"]=df["datetime"].dt.hour
-#plt.hist(hourtime, bins=24, range=(0, 24), density=True, alpha=0.5, color='blue')
-#plt.xlabel('Hour of the Day')
+#| error: false
+#| warning: false
+#| message: false
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+data = pd.read_csv("data/complete.csv", on_bad_lines='skip')
+data['datetime'] = pd.to_datetime(data['datetime'], errors='coerce')
+df=data[data["country"]=="us"].sort_index(level="datetime")
+df = df.dropna(subset=['datetime'])
+df = df.sort_values(by='datetime').reset_index(drop=True)
+df=df.dropna()
+hourtime=df["time"]=df["datetime"].dt.hour
+plt.hist(hourtime, bins=24, range=(0, 24), density=True, alpha=0.5, color='blue')
+plt.xlabel('Hour of the Day')
+plt.show()
 ```
 
 ### Heatmap 
