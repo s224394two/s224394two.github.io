@@ -7,7 +7,14 @@ format:
 jupyter: python3
 ---
 
+Since the beginning of the 20th century we have reported UFO sightings. What this project is trying to do is to look at the trend of the UFO sightings and try to explain them in a way which is not attributed to an increase in actual UFOs. Since a major part of the sightings are in the US (which already debunks the idea of UFOs actually being aliens) we are only focusing on that data.
 
+### Time series plot
+The first thing relevant to look at is the development of number of UFO sightings over the last decade. The first sighting in the data set is from 1910. But since they are so few sightings we choose to look at sightings from 1950 to 2014. Other than the number of sightings we also look at different popular shows and movies of different years to see if we might see their impact
+
+```{python}
+
+```
 
 ### Heatmap 
 ```{python}
