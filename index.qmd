@@ -1,11 +1,14 @@
 ---
 title: "What is the cause of the increase in UFO sightings?"
+
 from: markdown+emoji
 format:
   html:
     code-fold: true
 jupyter: python3
 ---
+## And can we see it in the data?
+
 
 Since the beginning of the 20th century we have reported UFO sightings. What this project is trying to do is to look at the trend of the UFO sightings and try to explain them in a way which is not attributed to an increase in actual UFOs. Since a major part of the sightings are in the US (which already debunks the idea of UFOs actually being aliens) we are only focusing on that data.
 
@@ -203,3 +206,185 @@ map_hooray.get_root().add_child(macro)
 # Display the map
 map_hooray
 ```
+
+One would assume that we can see a correlation between 
+ 
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+excluded = {'pr', 'dc'}
+
+data = pd.read_csv("data/historical_state_population_by_year.csv", on_bad_lines='skip')
+data = data[(data['year'] >= 1950) & (data['year'] <= 2014)]
+data["state"]=data["state"].str.lower()
+
+# Filter out non-states
+data["state"]=data["state"][data["state"].isin(excluded)==False]
+data = data.dropna(subset=['state'])
+
+
+
+df = pd.read_csv("data/complete.csv", on_bad_lines='skip')
+df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
+df=df[df["country"]=="us"].sort_index(level="datetime")
+df["state"]=df["state"][df["state"].isin(excluded)==False]
+df = df.dropna(subset=['datetime'])
+df = df.sort_values(by='datetime').reset_index(drop=True)
+df=df.dropna()
+df['year'] = df['datetime'].dt.year
+df = df[(df['year'] >= 1950) & (df['year'] <= 2014)]
+
+# Group by state and year
+grouped = df.groupby(['state', 'year']).size().reset_index(name='num_sightings')
+
+# Create complete state-year grid
+all_states = df['state'].unique()
+all_years = range(1950, 2015)
+full_index = pd.MultiIndex.from_product([all_states, all_years], names=['state', 'year'])
+
+# Reindex to include all combinations, fill missing with 0
+sightings_summary = grouped.set_index(['state', 'year']).reindex(full_index, fill_value=0).reset_index()
+sightings_summary = sightings_summary.sort_values(by=['state', 'year']).reset_index(drop=True)
+
+
+merged = pd.merge(data, sightings_summary, on=['state', 'year'])
+
+# Drop any rows with missing data (just in case)
+merged = merged.dropna(subset=['population', 'num_sightings'])
+
+# Calculate correlation
+correlation = merged['population'].corr(merged['num_sightings'])
+correlation
+
+plt.figure(figsize=(10, 6))
+
+# Plot each state as a different color
+for state in merged['state'].unique():
+    state_data = merged[merged['state'] == state]
+    plt.scatter(state_data['population'], state_data['num_sightings'], label=state, alpha=0.6, s=20)
+
+plt.title('UFO Sightings vs Population (1950–2014)')
+plt.xlabel('Population')
+plt.ylabel('Number of Sightings')
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize='small', ncol=2)
+plt.tight_layout()
+plt.grid(True)
+plt.show()
+```
+
+```{python}
+from bokeh.io import output_notebook, show
+from bokeh.plotting import figure
+from bokeh.models import ColumnDataSource, Slider, CustomJS
+from bokeh.layouts import column
+from sklearn.linear_model import LinearRegression
+import pandas as pd
+import numpy as np
+import json
+
+output_notebook()
+
+# Load and clean population data
+excluded = {'pr', 'dc'}
+data = pd.read_csv("data/historical_state_population_by_year.csv", on_bad_lines='skip')
+data = data[(data['year'] >= 1950) & (data['year'] <= 2014)]
+data["state"] = data["state"].str.lower()
+data = data[~data["state"].isin(excluded)]
+data = data.dropna(subset=['state'])
+
+# Load and clean sightings data
+df = pd.read_csv("data/complete.csv", on_bad_lines='skip')
+df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
+df = df[df["country"] == "us"]
+df = df[~df["state"].isin(excluded)]
+df = df.dropna(subset=['datetime'])
+df = df.sort_values(by='datetime').reset_index(drop=True)
+df['year'] = df['datetime'].dt.year
+df = df[(df['year'] >= 1950) & (df['year'] <= 2014)]
+
+# Group by state and year
+grouped = df.groupby(['state', 'year']).size().reset_index(name='num_sightings')
+
+# Create complete grid
+all_states = df['state'].unique()
+all_years = range(1950, 2015)
+full_index = pd.MultiIndex.from_product([all_states, all_years], names=['state', 'year'])
+sightings_summary = grouped.set_index(['state', 'year']).reindex(full_index, fill_value=0).reset_index()
+
+# Merge datasets
+merged = pd.merge(data, sightings_summary, on=['year', 'state'])
+
+# Compute correlation per year
+state_correlations = merged.groupby('year').apply(
+    lambda g: g['population'].corr(g['num_sightings'])
+).reset_index(name='correlation')
+
+# Prepare Bokeh data structures
+year_data = {}
+plot_meta = {}
+
+for year in sorted(merged['year'].unique()):
+    df_year = merged[merged['year'] == year]
+    x = df_year['population'].values
+    y = df_year['num_sightings'].values
+
+    if len(x) > 1:
+        model = LinearRegression()
+        model.fit(x.reshape(-1, 1), y)
+        y_pred = model.predict(x.reshape(-1, 1))
+        slope = model.coef_[0]
+        intercept = model.intercept_
+        ss_res = np.sum((y - y_pred) ** 2)
+        ss_tot = np.sum((y - np.mean(y)) ** 2)
+        r2 = 1 - ss_res / ss_tot
+    else:
+        y_pred = np.zeros_like(x)
+        slope = intercept = r2 = 0
+
+    corr = state_correlations[state_correlations['year'] == year]['correlation'].values[0]
+
+    year_data[str(year)] = {
+        'x': x.tolist(),
+        'y': y.tolist(),
+        'y_pred': y_pred.tolist()
+    }
+
+    plot_meta[str(year)] = {
+        'title': f"UFO Sightings vs Population - {year} | y = {slope:.2f}x + {intercept:.2f} | R² = {r2:.2f} | Corr = {corr:.2f}"
+    }
+
+# Bokeh plotting
+initial_year = str(sorted(merged['year'].unique())[0])
+source = ColumnDataSource(data=year_data[initial_year])
+
+p = figure(height=400, width=600,
+           title=plot_meta[initial_year]['title'],
+           x_axis_label='Population', y_axis_label='Number of Sightings')
+
+p.circle('x', 'y', size=8, source=source, legend_label="Data")
+p.line('x', 'y_pred', source=source, line_width=2, color='red', legend_label="Regression Line")
+p.legend.location = "top_left"
+
+# Slider and JS Callback
+slider = Slider(start=merged['year'].min(), end=merged['year'].max(), value=int(initial_year), step=1, title="Year")
+
+callback = CustomJS(args=dict(source=source, slider=slider, plot=p),
+    code=f"""
+        const year_data = {json.dumps(year_data)};
+        const meta = {json.dumps(plot_meta)};
+        const year = slider.value.toString();
+
+        source.data = year_data[year];
+        plot.title.text = meta[year].title;
+        source.change.emit();
+    """
+)
+
+slider.js_on_change('value', callback)
+
+show(column(slider, p))
+
+```
+
