@@ -13,9 +13,11 @@ jupyter: python3
 Since the beginning of the 20th century we have reported UFO sightings. What this project is trying to do is to look at the trend of the UFO sightings and try to explain them in a way which is not attributed to an increase in actual UFOs. Since a major part of the sightings are in the US (which already debunks the idea of UFOs actually being aliens) we are only focusing on that data.
 
 ### Time series plot
-The first thing relevant to look at is the development of number of UFO sightings over the last decade. The first sighting in the data set is from 1910. But since they are so few sightings we choose to look at sightings from 1950 to 2014. Other than the number of sightings we also look at different popular shows and movies of different years to see if we might see their impact
-
+If we look at the develpoment of sightigns over time. 
 ```{python}
+#| error: false
+#| warning: false
+#| message: false
 import pandas as pd
 from bokeh.plotting import figure, show
 from bokeh.io import output_notebook
@@ -23,7 +25,7 @@ from bokeh.models import ColumnDataSource, HoverTool, LabelSet
 from bokeh.palettes import Category20
 
 # Render inline
-output_notebook()
+output_notebook(hide_banner=True)
 
 # === Load & preprocess ===
 data = pd.read_csv("data/complete.csv", on_bad_lines='skip')
@@ -146,7 +148,7 @@ p.ygrid.grid_line_color       = "#222244"
 p.title.text_color            = "#eeeeee"
 p.title.text_font_size        = "16pt"
 p.legend.label_text_color     = "#ffffff"
-p.legend.background_fill_alpha= 0
+p.legend.background_fill_alpha= 1
 p.legend.location             = "top_left"
 p.legend.label_text_font_size = "9pt"
 
@@ -154,7 +156,158 @@ p.legend.label_text_font_size = "9pt"
 show(p)
 ```
 
-Skibidi 
+```{python}
+#| error: false
+#| warning: false
+#| message: false
+from bokeh.io import output_notebook, show
+from bokeh.plotting import figure
+from bokeh.models import ColumnDataSource, Slider, CustomJS
+from bokeh.layouts import column
+from bokeh.palettes import Category20
+import pandas as pd
+import numpy as np
+from math import pi, cos, sin
+
+output_notebook(hide_banner=1)
+
+
+
+df = pd.read_csv('data/complete.csv', on_bad_lines='skip', dtype=str)
+df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
+df = df.dropna(subset=['datetime'])
+df['year']  = df['datetime'].dt.year.astype(int)
+df['shape'] = df['shape'].fillna('UNKNOWN').str.upper()
+df = df[(df['year'] >= 1990) & (df['year'] <= 2014)]
+# — assume your df is already loaded & cleaned as before, and you have years, top_shapes, color_map —
+
+# Build per‐year angles + label coords
+years = list(range(1990, 2015))
+top_shapes = set()
+for y in years:
+    cnts = df[df['year']==y]['shape'].value_counts()
+    top_shapes |= set(cnts.index[:7])
+top_shapes = sorted(top_shapes)
+
+palette = Category20[20]
+color_map = {shape: palette[i % len(palette)] for i, shape in enumerate(top_shapes)}
+color_map['Uncommon Shapes'] = "#b0b0b0"
+
+color_map = {shape: palette[i % len(palette)] for i, shape in enumerate(top_shapes)}
+color_map['Uncommon Shapes'] = "#b0b0b0"
+
+data_by_year = {}
+for y in years:
+    cnts      = df[df['year']==y]['shape'].value_counts()
+    top7      = cnts.iloc[:7]
+    uncommon  = cnts.iloc[7:].sum()
+    labels    = list(top7.index)
+    values    = list(top7.values)
+    if uncommon>0:
+        labels.append('Uncommon Shapes')
+        values.append(uncommon)
+    total = sum(values)
+
+    # wedge angles
+    angles = [v/total * 2*pi for v in values]
+    starts = np.cumsum([0]+angles[:-1])
+    ends   = starts + angles
+
+    # mid‐angle, for label pos
+    mids   = starts + np.array(angles)/2
+    x_pct  = 0.5 * np.cos(mids)
+    y_pct  = 1   + 0.5 * np.sin(mids)
+    pct_text = [f"{v/total*100:1.1f}%" for v in values]
+
+    # optional: shape names outside
+    x_lab  = 1.05 * np.cos(mids)
+    y_lab  = 1    + 1.05 * np.sin(mids)
+
+    data_by_year[str(y)] = {
+        'start_angle': starts.tolist(),
+        'end_angle':   ends.tolist(),
+        'color':       [color_map[l] for l in labels],
+        'label':       labels,
+        'pct_text':    pct_text,
+        'x_pct':       x_pct.tolist(),
+        'y_pct':       y_pct.tolist(),
+        'x_lab':       x_lab.tolist(),
+        'y_lab':       y_lab.tolist(),
+    }
+
+# Initial year
+initial = years[0]
+src     = ColumnDataSource(data_by_year[str(initial)])
+
+p = figure(height=400, width=400,
+           title=f"UFO Shapes in {initial}",
+           toolbar_location=None,
+           x_range=(-1.2,1.2), y_range=(0,2.2))
+
+# draw wedges
+p.wedge(x=0, y=1, radius=0.8,
+        start_angle='start_angle', end_angle='end_angle',
+        fill_color='color', line_color='white',
+        source=src)
+
+# draw % texts inside
+p.text(x='x_pct', y='y_pct', text='pct_text',
+       source=src,
+       text_align='center', text_baseline='middle',
+       text_font_size='9pt')
+
+# draw shape names outside
+p.text(x='x_lab', y='y_lab', text='label',
+       source=src,
+       text_align='center', text_baseline='middle',
+       text_font_size='9pt', text_font_style='bold')
+
+p.axis.visible = False
+p.grid.visible = False
+
+# slider + callback
+slider = Slider(start=years[0], end=years[-1],
+                value=initial, step=1, title="Year")
+
+callback = CustomJS(args=dict(src=src,
+                              data_by_year=data_by_year,
+                              plot=p,
+                              slider=slider), code="""
+    const yr = slider.value.toString();
+    const d  = data_by_year[yr];
+    src.data = d;
+    plot.title.text = 'UFO Shapes in ' + yr;
+    src.change.emit();
+""")
+slider.js_on_change('value', callback)
+
+show(column(slider, p))
+```
+
+Above we have a time-series plot that shows the number of sightings in the US throughout 1990-2014. Overall we see a growing number of sightings throughout the years. It is although observed that around 2013-2014 that the number of sightings drastically decreased. This is due to the dataset cutting of approx. mid September 2013, which is the primary reason for the drop in sightings. Overall on the graph we observe a maximum peak at around 2012-2013 indicating that more people than ever are observing UFO's. On Astronomy's article 'Reports of rising UFO sightings are greatly exaggerated' they mention that due to the lack of a mechanical shutter on the camera of our cellular device, artifacts may blur or smear and alter the observations. In 2012 there was also something known as the '2012 phenomenon' where there was beliefs going around about judgement, rebirth etc. and that some planet (known as Planet X) would pass/collide by/with earth. These beliefs have very likely influenced peoples perceptions and made them more susceptible to imagine things. These factors might have been contributor to the increase in sightings around 2012-2013.
+
+
+On the plot we also see frequency distribution of the UFO shapes that people have observed throughout 1990-2014 where we can more easily observe the distributions on the plot to the right. 
+
+Here we have a pi-chart that shows the distribution of UFO shapes more clearly through the years. We observe that the ratio of reported shapes seems to remain relatively unchanged however observe a huge spike around 1995 for unknown shapes.
+
+Lets now look at the bigger picture as to what might have caused such surges in sightings throughout the 90's till 2010's. Looking at the 'ICAO - World Aviation and the World Economy', despite not directly showing an increase in number of flights, but it is indirectly implied as the 'Revenue Passenger-Kilometres' increases drastically throughout the years. This might show the overall trend of increase in sightings, as the higher the number of air-vehicles increases the likelihood of assuming they are UFO's. On the time-series plot there are yellow dots at certain years. These dots show the release of some major alien movies. We observe that close to release of 'X-files' and especially 'Independence Day' the number of sightings dramatically increased within the span of a year. This might imply that pop-culture makes people see the skies a little differently. In the article 'Record British UFO sightings in 1990s' by CBC, where they emphasize that films and TV (Here mentioning X-files and Independence day) has raised the publics awareness of UFO's which would lead to an increase in UFO reports as people would engage with the skies more often.
+
+Kilder:
+
+https://www.astronomy.com/science/reports-of-rising-ufo-sightings-are-greatly-exaggerated/
+
+https://en.wikipedia.org/wiki/Nibiru_cataclysm (ift Planet X i 2012)
+
+https://www.icao.int/sustainability/pages/facts-figures_worldeconomydata.aspx
+
+https://www.cbc.ca/news/world/record-british-ufo-sightings-in-1990s-1.817993
+
+
+
+
+
+### Hour of the day
 ```{python}
 #| error: false
 #| warning: false
@@ -173,6 +326,11 @@ plt.hist(hourtime, bins=24, range=(0, 24), density=True, alpha=0.5, color='blue'
 plt.xlabel('Hour of the Day')
 plt.show()
 ```
+We’ve now examined two theories attempting to explain the recent surge in UFO sightings. But what happens when we shift our focus to when these sightings occur throughout the day?
+
+As shown in Figure 2, the majority of sightings are clustered between 20:00 and 24:00, with a noticeable peak at 22:00. Several factors might account for this trend. Referring back to Figure 1, we see that the most commonly reported UFO shape is simply described as “light.” This aligns neatly with what we might expect after all, the stark contrast between a dark night sky and any bright object makes such lights far more noticeable. It is the same principle, that makes stars visible at night.
+
+Why 22:00 in particular? It appears to represent an optimal balance. By this hour, the sky is fully dark, providing ideal conditions for spotting shining objects against a dark backdrop. At the same time, it is still within a reasonable timeframe when many people are likely to be outdoors. In contrast, sightings tend to decline past midnight, likely due to reduced human presence and decreased observational activity during the early morning hours.
 
 ### Heatmap 
 ```{python}
@@ -341,10 +499,23 @@ map_hooray.get_root().add_child(macro)
 # Display the map
 map_hooray
 ```
+Now we want to explore a different angle, we therefore wish to plot the geographical data. This results in a heat map. Along with the sighting distribution the heat map also contains airforce bases, in order to explore Air Force flights influence on UFO sightings. The heat map will only contain Air Force bases, despite other branches of the U.S Military containing aircraft, due to simplicity as it would be impossible to distinguish between an Army Airbase, and an regular infantry base. 
 
-One would assume that we can see a correlation between 
+Figure 3 reveals a clear pattern: regions in proximity to active airbases tend to exhibit a high density of UFO sightings. One plausible explanation is that these sightings may, in fact, correspond to military aircraft activity. Given that military aircraft are routinely operated near their bases regardless of weather conditions or time of day it is not unreasonable to assume that experimental or unfamiliar aircraft flying at night could be mistaken for unidentified flying objects by unsuspecting observers. Since airbases are geographically fixed, such misidentifications would naturally accumulate in the same locations over time, resulting in noticeable clusters of sightings. 
+
+Another notable observation from Figure 3 is the clear disparity in the density and distribution of UFO sightings between the eastern and western regions of the United States. Sightings appear to be significantly more frequent in the east, where high density areas form a nearly continuous band across much of the region. This pattern is especially pronounced around major metropolitan centers such as New York, Chicago, and Washington, D.C, where sightings are heavily clustered. In contrast, the western United States shows a markedly different pattern. Sightings in this region are largely confined to the coasts and major urban centers, including cities like Los Angeles and San Francisco. Vast interior areas of the west, including parts of the Rocky Mountains and Great Basin, exhibit little to no reported activity.
+
+We suspect the reason between this great disparity, is most likely population size and density. As we mentioned two large areas of the west ie. The Rocky Mountains and Great Basin has almost no sightings reported. These two areas are also very sparsely populated, while coastal and urban centers such as Los Angeles, San Francisco, Seattle, Salt Lake City and Denver still report large amounts of sightings. This could indicate that reported UFO sightings are correlated with population size.
+
+** There is also something to talk about in regards to low populated states having spikes in sigighings **
+
+
+### Correlation between 
  
 ```{python}
+#| error: false
+#| warning: false
+#| message: false
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -410,6 +581,9 @@ plt.show()
 ```
 
 ```{python}
+#| error: false
+#| warning: false
+#| message: false
 from bokeh.io import output_notebook, show
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, Slider, CustomJS
@@ -419,7 +593,7 @@ import pandas as pd
 import numpy as np
 import json
 
-output_notebook()
+output_notebook(hide_banner=True)
 
 # Load and clean population data
 excluded = {'pr', 'dc'}
