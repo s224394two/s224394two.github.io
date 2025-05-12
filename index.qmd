@@ -16,10 +16,145 @@ Since the beginning of the 20th century we have reported UFO sightings. What thi
 The first thing relevant to look at is the development of number of UFO sightings over the last decade. The first sighting in the data set is from 1910. But since they are so few sightings we choose to look at sightings from 1950 to 2014. Other than the number of sightings we also look at different popular shows and movies of different years to see if we might see their impact
 
 ```{python}
+import pandas as pd
+from bokeh.plotting import figure, show
+from bokeh.io import output_notebook
+from bokeh.models import ColumnDataSource, HoverTool, LabelSet
+from bokeh.palettes import Category20
 
+# Render inline
+output_notebook()
+
+# === Load & preprocess ===
+data = pd.read_csv("data/complete.csv", on_bad_lines='skip')
+data["datetime"] = pd.to_datetime(data["datetime"], errors="coerce")
+df = (
+    data[data["country"].str.lower() == "us"]
+    .dropna(subset=["datetime", "shape"])
+    .copy()
+)
+df["year"] = df["datetime"].dt.year
+
+# === Totals from 1990–2014 ===
+totals = df.groupby("year").size()
+totals = totals[(totals.index >= 1990) & (totals.index <= 2014)]
+
+# === Shape pivot from 1990–2014 ===
+shape_counts_all = df.groupby(["year", "shape"]).size().unstack(fill_value=0)
+shape_counts_all = shape_counts_all[
+    (shape_counts_all.index >= 1990) &
+    (shape_counts_all.index <= 2014)
+]
+
+# === Top 5 shapes + “uncommon shapes” ===
+shape_totals = shape_counts_all.sum().sort_values(ascending=False)
+top_shapes    = shape_totals.head(5).index
+other_shapes  = shape_totals.index.difference(top_shapes)
+
+shape_counts = shape_counts_all[top_shapes].copy()
+shape_counts["uncommon shapes"] = shape_counts_all[other_shapes].sum(axis=1)
+
+# === Prepare ColumnDataSource ===
+final_shapes = ["uncommon shapes"] + list(top_shapes)
+source_data  = {"year": shape_counts.index.tolist()}
+colors       = Category20[20][:len(final_shapes)]
+for s in final_shapes:
+    source_data[s] = shape_counts[s].values
+source = ColumnDataSource(source_data)
+
+# === Emoji map ===
+emoji_map = {
+    "light": "💡", "triangle": "🔺", "circle": "⭕",
+    "fireball": "🔥", "unknown": "❓", "uncommon shapes": "🛸"
+}
+
+# === Media events 1990–2014 ===
+media = {
+    1951: "The Day the Earth Stood Still",
+    1977: "Close Encounters", 1979: "Alien", 1982: "E.T.",
+    1986: "Aliens", 1993: "The X-Files (TV)", 1996: "Independence Day",
+    1998: "X-Files: The Movie", 2002: "Signs",
+    2009: "District 9", 2014: "Edge of Tomorrow"
+}
+media_years = [y for y in media if 1990 <= y <= 2014 and y in totals.index]
+media_source = ColumnDataSource(dict(
+    year =[y for y in media_years],
+    count=[totals[y] for y in media_years],
+    title=[media[y] for y in media_years]
+))
+
+# === Figure setup ===
+p = figure(
+    width=1000, height=500,
+    x_range=(1990, 2014),
+    y_range=(0, shape_counts.sum(axis=1).max() * 1.15),
+    background_fill_color="#0f0f1f",
+    title="U.S. UFO Shape Distribution Over Time (1990–2014)",
+    tools="", toolbar_location=None
+)
+
+# === Stacked area ===
+p.varea_stack(
+    stackers=final_shapes,
+    x="year",
+    color=colors,
+    legend_label=[f"{emoji_map[s]} {s}" for s in final_shapes],
+    source=source
+)
+p.legend.items = list(reversed(p.legend.items))
+
+# === Media event markers ===
+media_renderer = p.circle(
+    'year','count', source=media_source,
+    size=12, fill_color="#ffd700", line_color="white",
+    line_width=1.3, legend_label="Media Event", level="overlay"
+)
+p.add_tools(HoverTool(
+    renderers=[media_renderer],
+    tooltips=[("Movie", "@title"), ("Year","@year"), ("Sightings","@count")],
+    mode="mouse", point_policy="follow_mouse"
+))
+
+# === Emojis ===
+recent = shape_counts.tail(25)
+max_h  = recent.sum(axis=1).max()
+x_pts, y_pts, emojis, sizes = [], [], [], []
+for i, s in enumerate(final_shapes):
+    yr    = recent[s].idxmax()
+    below = recent[final_shapes[:i]].loc[yr].sum()
+    band  = recent[s].loc[yr]
+    x_pts.append(yr)
+    y_pts.append(below + band/2)
+    emojis.append(emoji_map[s])
+    sizes.append(f"{10 + band/max_h*16 - 4:.0f}pt")
+
+emoji_source = ColumnDataSource(dict(x=x_pts, y=y_pts, emoji=emojis, size=sizes))
+p.add_layout(LabelSet(
+    x='x', y='y', text='emoji', source=emoji_source,
+    text_font_size='size', text_align="center", text_baseline="middle"
+))
+
+# === Styling ===
+p.xaxis.axis_label            = "Year"
+p.yaxis.axis_label            = "Sightings"
+p.xaxis.major_label_text_color = "#cccccc"
+p.yaxis.major_label_text_color = "#cccccc"
+p.xaxis.axis_line_color       = "#333333"
+p.yaxis.axis_line_color       = "#333333"
+p.xgrid.grid_line_color       = None
+p.ygrid.grid_line_color       = "#222244"
+p.title.text_color            = "#eeeeee"
+p.title.text_font_size        = "16pt"
+p.legend.label_text_color     = "#ffffff"
+p.legend.background_fill_alpha= 0
+p.legend.location             = "top_left"
+p.legend.label_text_font_size = "9pt"
+
+# Show it
+show(p)
 ```
 
-If we look at the
+Skibidi 
 ```{python}
 #| error: false
 #| warning: false
