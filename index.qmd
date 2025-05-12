@@ -13,7 +13,7 @@ jupyter: python3
 Since the beginning of the 20th century we have reported UFO sightings. What this project is trying to do is to look at the trend of the UFO sightings and try to explain them in a way which is not attributed to an increase in actual UFOs. Since a major part of the sightings are in the US (which already debunks the idea of UFOs actually being aliens) we are only focusing on that data.
 
 ### Time series plot
-If we look at the develpoment of sightigns over time. 
+If we look at the develpoment of sightigns over time. We choose to look at only the sightings from 1990 and further since the number of sightings is low that there is no meaningful insight to gain.
 ```{python}
 #| error: false
 #| warning: false
@@ -87,10 +87,10 @@ media_source = ColumnDataSource(dict(
 
 # === Figure setup ===
 p = figure(
-    width=1000, height=500,
+    width=640, height=400,
     x_range=(1990, 2014),
     y_range=(0, shape_counts.sum(axis=1).max() * 1.15),
-    background_fill_color="#0f0f1f",
+    background_fill_color="#f5f5f5",
     title="U.S. UFO Shape Distribution Over Time (1990–2014)",
     tools="", toolbar_location=None
 )
@@ -147,14 +147,16 @@ p.xgrid.grid_line_color       = None
 p.ygrid.grid_line_color       = "#222244"
 p.title.text_color            = "#eeeeee"
 p.title.text_font_size        = "16pt"
-p.legend.label_text_color     = "#ffffff"
-p.legend.background_fill_alpha= 1
+p.legend.label_text_color     = "#000000"
+p.legend.background_fill_alpha=  1
 p.legend.location             = "top_left"
 p.legend.label_text_font_size = "9pt"
 
 # Show it
 show(p)
 ```
+
+Another way of looking at this plot is using a pie-chart.
 
 ```{python}
 #| error: false
@@ -168,6 +170,15 @@ from bokeh.palettes import Category20
 import pandas as pd
 import numpy as np
 from math import pi, cos, sin
+from IPython.core.display import HTML as Center
+
+Center(""" <style>
+.output_png {
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+}
+</style> """)
 
 output_notebook(hide_banner=1)
 
@@ -239,7 +250,7 @@ for y in years:
 initial = years[0]
 src     = ColumnDataSource(data_by_year[str(initial)])
 
-p = figure(height=400, width=400,
+p = figure(height=640, width=640,
            title=f"UFO Shapes in {initial}",
            toolbar_location=None,
            x_range=(-1.2,1.2), y_range=(0,2.2))
@@ -321,8 +332,12 @@ df=data[data["country"]=="us"].sort_index(level="datetime")
 df = df.dropna(subset=['datetime'])
 df = df.sort_values(by='datetime').reset_index(drop=True)
 df=df.dropna()
+
+plt.figure().set_figwidth(7.5)
+ax=plt.gca()
+ax.set_facecolor("#f5f5f5")
 hourtime=df["time"]=df["datetime"].dt.hour
-plt.hist(hourtime, bins=24, range=(0, 24), density=True, alpha=0.5, color='blue')
+plt.hist(hourtime, bins=24, range=(0, 24), density=True, alpha=0.5, color='blue',)
 plt.xlabel('Hour of the Day')
 plt.show()
 ```
@@ -511,73 +526,96 @@ We suspect the reason between this great disparity, is most likely population si
 
 
 ### Correlation between 
- 
+ We want to investigate if there is this correlation between 
 ```{python}
 #| error: false
 #| warning: false
 #| message: false
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+from bokeh.plotting import figure, show, output_notebook
+from bokeh.models import ColumnDataSource, CustomJS, HoverTool, TapTool
+from bokeh.palettes import viridis
+
+output_notebook(hide_banner=1)
 
 excluded = {'pr', 'dc'}
 
+# Load and clean population data
 data = pd.read_csv("data/historical_state_population_by_year.csv", on_bad_lines='skip')
 data = data[(data['year'] >= 1950) & (data['year'] <= 2014)]
-data["state"]=data["state"].str.lower()
-
-# Filter out non-states
-data["state"]=data["state"][data["state"].isin(excluded)==False]
+data["state"] = data["state"].str.lower()
+data = data[data["state"].isin(excluded) == False]
 data = data.dropna(subset=['state'])
 
-
-
+# Load and clean UFO data
 df = pd.read_csv("data/complete.csv", on_bad_lines='skip')
 df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
-df=df[df["country"]=="us"].sort_index(level="datetime")
-df["state"]=df["state"][df["state"].isin(excluded)==False]
+df = df[df["country"] == "us"]
+df = df[df["state"].isin(excluded) == False]
 df = df.dropna(subset=['datetime'])
-df = df.sort_values(by='datetime').reset_index(drop=True)
-df=df.dropna()
 df['year'] = df['datetime'].dt.year
 df = df[(df['year'] >= 1950) & (df['year'] <= 2014)]
 
-# Group by state and year
+# Group and merge
 grouped = df.groupby(['state', 'year']).size().reset_index(name='num_sightings')
-
-# Create complete state-year grid
-all_states = df['state'].unique()
+all_states = sorted(df['state'].unique())
 all_years = range(1950, 2015)
 full_index = pd.MultiIndex.from_product([all_states, all_years], names=['state', 'year'])
-
-# Reindex to include all combinations, fill missing with 0
 sightings_summary = grouped.set_index(['state', 'year']).reindex(full_index, fill_value=0).reset_index()
-sightings_summary = sightings_summary.sort_values(by=['state', 'year']).reset_index(drop=True)
+merged = pd.merge(data, sightings_summary, on=['state', 'year']).dropna(subset=['population', 'num_sightings'])
 
+# Assign colors and alpha
+palette = viridis(len(all_states))
+state_color_map = dict(zip(all_states, palette))
+merged['color'] = merged['state'].map(state_color_map)
+merged['alpha'] = [0.6] * len(merged)
 
-merged = pd.merge(data, sightings_summary, on=['state', 'year'])
+source = ColumnDataSource(merged)
 
-# Drop any rows with missing data (just in case)
-merged = merged.dropna(subset=['population', 'num_sightings'])
+# Plot setup
+p = figure(title="UFO Sightings vs Population (1950–2014)",
+           x_axis_label="Population", y_axis_label="Number of Sightings",
+           tools="pan,wheel_zoom,box_zoom,reset,tap,hover",
+           width=640, height=600)
 
-# Calculate correlation
-correlation = merged['population'].corr(merged['num_sightings'])
-correlation
+# Draw points
+p.circle('population', 'num_sightings',
+         source=source,
+         size=6,
+         color='color',
+         alpha='alpha',
+         line_color=None)
 
-plt.figure(figsize=(10, 6))
+# Hover tool: passive inspection
+hover = p.select_one(HoverTool)
+hover.tooltips = [
+    ("State", "@state"),
+    ("Year", "@year"),
+    ("Population", "@population{0,0}"),
+    ("Sightings", "@num_sightings")
+]
 
-# Plot each state as a different color
-for state in merged['state'].unique():
-    state_data = merged[merged['state'] == state]
-    plt.scatter(state_data['population'], state_data['num_sightings'], label=state, alpha=0.6, s=20)
+# Tap tool: highlights all from the clicked state
+tap_callback = CustomJS(args=dict(source=source), code="""
+    const selected = source.selected.indices[0];
+    const data = source.data;
+    const N = data['state'].length;
 
-plt.title('UFO Sightings vs Population (1950–2014)')
-plt.xlabel('Population')
-plt.ylabel('Number of Sightings')
-plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize='small', ncol=2)
-plt.tight_layout()
-plt.grid(True)
-plt.show()
+    if (selected == null) return;
+
+    const selected_state = data['state'][selected];
+
+    for (let i = 0; i < N; i++) {
+        data['alpha'][i] = (data['state'][i] === selected_state) ? 1.0 : 0.1;
+    }
+    source.change.emit();
+""")
+
+taptool = p.select_one(TapTool)
+taptool.callback = tap_callback
+
+show(p)
+
 ```
 
 ```{python}
@@ -636,7 +674,7 @@ plot_meta = {}
 
 for year in sorted(merged['year'].unique()):
     df_year = merged[merged['year'] == year]
-    x = df_year['population'].values
+    x = df_year['population'].values/1000000
     y = df_year['num_sightings'].values
 
     if len(x) > 1:
@@ -661,20 +699,20 @@ for year in sorted(merged['year'].unique()):
     }
 
     plot_meta[str(year)] = {
-        'title': f"UFO Sightings vs Population - {year} | y = {slope:.2f}x + {intercept:.2f} | R² = {r2:.2f} | Corr = {corr:.2f}"
+        'title': f"UFO Sightings vs Population - {year} | Correlation = {corr:.2f}"
     }
 
 # Bokeh plotting
 initial_year = str(sorted(merged['year'].unique())[0])
 source = ColumnDataSource(data=year_data[initial_year])
 
-p = figure(height=400, width=600,
+p = figure(height=400, width=640,
            title=plot_meta[initial_year]['title'],
-           x_axis_label='Population', y_axis_label='Number of Sightings')
+           x_axis_label='Population (per milion)', y_axis_label='Number of Sightings',background_fill_color="#f5f5f5")
 
-p.circle('x', 'y', size=8, source=source, legend_label="Data")
-p.line('x', 'y_pred', source=source, line_width=2, color='red', legend_label="Regression Line")
-p.legend.location = "top_left"
+p.circle('x', 'y', size=8, source=source)
+p.line('x', 'y_pred', source=source, line_width=2, color='red')
+#p.legend.location = "top_left"
 
 # Slider and JS Callback
 slider = Slider(start=merged['year'].min(), end=merged['year'].max(), value=int(initial_year), step=1, title="Year")
@@ -697,3 +735,106 @@ show(column(slider, p))
 
 ```
 
+```{python}
+
+import pandas as pd
+from bokeh.plotting import figure, show, output_notebook
+from bokeh.models import ColumnDataSource, CustomJS, HoverTool, TapTool
+from bokeh.palettes import viridis
+
+output_notebook(hide_banner=1)
+
+excluded = {'pr', 'dc'}
+
+# Load and clean population data
+data = pd.read_csv("data/historical_state_population_by_year.csv", on_bad_lines='skip')
+data = data[(data['year'] >= 1950) & (data['year'] <= 2014)]
+data["state"] = data["state"].str.lower()
+data = data[data["state"].isin(excluded) == False]
+data = data.dropna(subset=['state'])
+
+# Load and clean UFO data
+df = pd.read_csv("data/complete.csv", on_bad_lines='skip')
+df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
+df = df[df["country"] == "us"]
+df = df[df["state"].isin(excluded) == False]
+df = df.dropna(subset=['datetime'])
+df['year'] = df['datetime'].dt.year
+df = df[(df['year'] >= 1950) & (df['year'] <= 2014)]
+
+# Group and merge
+grouped = df.groupby(['state', 'year']).size().reset_index(name='num_sightings')
+all_states = sorted(df['state'].unique())
+all_years = range(1950, 2015)
+full_index = pd.MultiIndex.from_product([all_states, all_years], names=['state', 'year'])
+sightings_summary = grouped.set_index(['state', 'year']).reindex(full_index, fill_value=0).reset_index()
+merged = pd.merge(data, sightings_summary, on=['state', 'year']).dropna(subset=['population', 'num_sightings'])
+
+# Use a colorblind-friendly palette
+colorblind_palette = [
+    "#332288", "#88CCEE", "#44AA99", "#117733", "#999933",
+    "#DDCC77", "#CC6677", "#882255", "#AA4499", "#661100",
+    "#6699CC", "#888888"
+]
+extended_palette = (colorblind_palette * ((len(all_states) // len(colorblind_palette)) + 1))[:len(all_states)]
+state_color_map = dict(zip(all_states, extended_palette))
+
+merged['color'] = merged['state'].map(state_color_map)
+merged['alpha'] = [0.6] * len(merged)
+
+source = ColumnDataSource(merged)
+
+# Plot setup
+p = figure(title="UFO Sightings vs Population (1950–2014)",
+           x_axis_label="Population", y_axis_label="Number of Sightings",
+           tools="pan,wheel_zoom,box_zoom,reset,tap,hover",
+           width=640, height=600)
+
+# Draw points
+p.circle('population', 'num_sightings',
+         source=source,
+         size=6,
+         color='color',
+         alpha='alpha',
+         line_color=None)
+
+# Hover tool: passive inspection
+hover = p.select_one(HoverTool)
+hover.tooltips = [
+    ("State", "@state"),
+    ("Year", "@year"),
+    ("Population", "@population{0,0}"),
+    ("Sightings", "@num_sightings")
+]
+
+# Tap tool: highlights all from the clicked state
+tap_callback = CustomJS(args=dict(source=source), code="""
+    const selected = source.selected.indices[0];
+    const data = source.data;
+    const N = data['state'].length;
+
+    if (selected == null) return;
+
+    const selected_state = data['state'][selected];
+
+    for (let i = 0; i < N; i++) {
+        data['alpha'][i] = (data['state'][i] === selected_state) ? 1.0 : 0.1;
+    }
+    source.change.emit();
+""")
+
+taptool = p.select_one(TapTool)
+taptool.callback = tap_callback
+
+show(p)
+```
+
+An examination of Figures 4 and 5 supports the hypothesis that reported UFO sightings are positively correlated with population size. This relationship is most evident in the year 2008, which shows the highest correlation coefficient of 0.96 between state population and the number of reported sightings. In contrast, the year 1951 exhibits the lowest correlation, with a coefficient of just 0.34. Overall, the early years of the dataset, particularly the first two decades, display a relatively weak correlation between population and sightings. However, beginning in the 1970s, the correlation becomes significantly stronger and more consistent.
+
+This trend may be attributed to the growing influence of popular culture during that time. The 1970s marked a rise in public interest in UFOs and extraterrestrial life, largely driven by the emergence of films, television shows, and books that featured such themes. As these topics entered mainstream entertainment, public awareness and curiosity about UFOs likely increased. Moreover, the depiction of UFO sightings in media may have contributed to a gradual reduction in the stigma or taboo associated with reporting such events.
+
+It is plausible that in the earlier decades, individuals were more hesitant to report sightings due to fear of ridicule or disbelief. As cultural perceptions shifted and UFO phenomena became more widely discussed and accepted, people may have felt more comfortable coming forward with their observations. Thus, the strengthening correlation over time could reflect not only population growth but also a growing willingness to report sightings, influenced by evolving social and cultural attitudes. 
+
+The previously mentioned factors help explain the overall increase in reported UFO sightings but do not fully account for the growing correlation between population size and sightings over time. To better understand this trend, it is useful to consider how observation conditions vary with geography. Interestingly, some of the best locations in the United States for observing the night sky are in sparsely populated areas, particularly in the western region. According to World Atlas (https://www.worldatlas.com/places/the-best-us-locations-for-unobstructed-night-sky-viewing.html), four out of the six top-rated stargazing locations in the U.S. are in the West, with many of them situated in desert environments. These areas offer minimal light pollution and clear, unobstructed skies ideal conditions for observing aerial activity.
+
+This suggests that in the earlier decades of the dataset, sightings may have been more likely to occur in these open and remote areas, where sky visibility is optimal but population density is low. As a result, even though sightings occurred, they were less frequent overall and less likely to be reported or to reflect population trends. Over time, as public interest in UFOs increased and reporting became more socially acceptable, sightings in more populated areas began to rise, thereby increasing the observed correlation with population. Thus, the shift in both where and how often people reported sightings may explain the growing alignment between population size and UFO sighting frequency.
