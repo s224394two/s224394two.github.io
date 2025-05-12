@@ -335,9 +335,11 @@ df=df.dropna()
 
 plt.figure().set_figwidth(7.5)
 ax=plt.gca()
+plt.xticks(np.arange(0, 25, 1))
 ax.set_facecolor("#f5f5f5")
 hourtime=df["time"]=df["datetime"].dt.hour
-plt.hist(hourtime, bins=24, range=(0, 24), density=True, alpha=0.5, color='blue',)
+plt.hist(hourtime, bins=24, range=(0, 24), density=0, alpha=0.5, color='blue',)
+plt.xlim(0,24)
 plt.xlabel('Hour of the Day')
 plt.show()
 ```
@@ -563,10 +565,16 @@ all_years = range(1950, 2015)
 full_index = pd.MultiIndex.from_product([all_states, all_years], names=['state', 'year'])
 sightings_summary = grouped.set_index(['state', 'year']).reindex(full_index, fill_value=0).reset_index()
 merged = pd.merge(data, sightings_summary, on=['state', 'year']).dropna(subset=['population', 'num_sightings'])
+merged['population'] = merged['population'] / 1_000_000
+# Use a colorblind-friendly palette
+colorblind_palette = [
+    "#332288", "#88CCEE", "#44AA99", "#117733", "#999933",
+    "#DDCC77", "#CC6677", "#882255", "#AA4499", "#661100",
+    "#6699CC", "#888888"
+]
+extended_palette = (colorblind_palette * ((len(all_states) // len(colorblind_palette)) + 1))[:len(all_states)]
+state_color_map = dict(zip(all_states, extended_palette))
 
-# Assign colors and alpha
-palette = viridis(len(all_states))
-state_color_map = dict(zip(all_states, palette))
 merged['color'] = merged['state'].map(state_color_map)
 merged['alpha'] = [0.6] * len(merged)
 
@@ -615,9 +623,7 @@ taptool = p.select_one(TapTool)
 taptool.callback = tap_callback
 
 show(p)
-
 ```
-
 ```{python}
 #| error: false
 #| warning: false
@@ -732,102 +738,9 @@ callback = CustomJS(args=dict(source=source, slider=slider, plot=p),
 slider.js_on_change('value', callback)
 
 show(column(slider, p))
-
 ```
 
-```{python}
 
-import pandas as pd
-from bokeh.plotting import figure, show, output_notebook
-from bokeh.models import ColumnDataSource, CustomJS, HoverTool, TapTool
-from bokeh.palettes import viridis
-
-output_notebook(hide_banner=1)
-
-excluded = {'pr', 'dc'}
-
-# Load and clean population data
-data = pd.read_csv("data/historical_state_population_by_year.csv", on_bad_lines='skip')
-data = data[(data['year'] >= 1950) & (data['year'] <= 2014)]
-data["state"] = data["state"].str.lower()
-data = data[data["state"].isin(excluded) == False]
-data = data.dropna(subset=['state'])
-
-# Load and clean UFO data
-df = pd.read_csv("data/complete.csv", on_bad_lines='skip')
-df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
-df = df[df["country"] == "us"]
-df = df[df["state"].isin(excluded) == False]
-df = df.dropna(subset=['datetime'])
-df['year'] = df['datetime'].dt.year
-df = df[(df['year'] >= 1950) & (df['year'] <= 2014)]
-
-# Group and merge
-grouped = df.groupby(['state', 'year']).size().reset_index(name='num_sightings')
-all_states = sorted(df['state'].unique())
-all_years = range(1950, 2015)
-full_index = pd.MultiIndex.from_product([all_states, all_years], names=['state', 'year'])
-sightings_summary = grouped.set_index(['state', 'year']).reindex(full_index, fill_value=0).reset_index()
-merged = pd.merge(data, sightings_summary, on=['state', 'year']).dropna(subset=['population', 'num_sightings'])
-
-# Use a colorblind-friendly palette
-colorblind_palette = [
-    "#332288", "#88CCEE", "#44AA99", "#117733", "#999933",
-    "#DDCC77", "#CC6677", "#882255", "#AA4499", "#661100",
-    "#6699CC", "#888888"
-]
-extended_palette = (colorblind_palette * ((len(all_states) // len(colorblind_palette)) + 1))[:len(all_states)]
-state_color_map = dict(zip(all_states, extended_palette))
-
-merged['color'] = merged['state'].map(state_color_map)
-merged['alpha'] = [0.6] * len(merged)
-
-source = ColumnDataSource(merged)
-
-# Plot setup
-p = figure(title="UFO Sightings vs Population (1950–2014)",
-           x_axis_label="Population", y_axis_label="Number of Sightings",
-           tools="pan,wheel_zoom,box_zoom,reset,tap,hover",
-           width=640, height=600)
-
-# Draw points
-p.circle('population', 'num_sightings',
-         source=source,
-         size=6,
-         color='color',
-         alpha='alpha',
-         line_color=None)
-
-# Hover tool: passive inspection
-hover = p.select_one(HoverTool)
-hover.tooltips = [
-    ("State", "@state"),
-    ("Year", "@year"),
-    ("Population", "@population{0,0}"),
-    ("Sightings", "@num_sightings")
-]
-
-# Tap tool: highlights all from the clicked state
-tap_callback = CustomJS(args=dict(source=source), code="""
-    const selected = source.selected.indices[0];
-    const data = source.data;
-    const N = data['state'].length;
-
-    if (selected == null) return;
-
-    const selected_state = data['state'][selected];
-
-    for (let i = 0; i < N; i++) {
-        data['alpha'][i] = (data['state'][i] === selected_state) ? 1.0 : 0.1;
-    }
-    source.change.emit();
-""")
-
-taptool = p.select_one(TapTool)
-taptool.callback = tap_callback
-
-show(p)
-```
 
 An examination of Figures 4 and 5 supports the hypothesis that reported UFO sightings are positively correlated with population size. This relationship is most evident in the year 2008, which shows the highest correlation coefficient of 0.96 between state population and the number of reported sightings. In contrast, the year 1951 exhibits the lowest correlation, with a coefficient of just 0.34. Overall, the early years of the dataset, particularly the first two decades, display a relatively weak correlation between population and sightings. However, beginning in the 1970s, the correlation becomes significantly stronger and more consistent.
 
