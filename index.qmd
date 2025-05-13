@@ -59,7 +59,16 @@ shape_counts["uncommon shapes"] = shape_counts_all[other_shapes].sum(axis=1)
 # === Prepare ColumnDataSource ===
 final_shapes = ["uncommon shapes"] + list(top_shapes)
 source_data  = {"year": shape_counts.index.tolist()}
-colors       = Category20[20][:len(final_shapes)]
+#colors       = Category20[20][:len(final_shapes)]
+colors = [
+    "#f0ad4e",  # yellow  → "uncommon shapes"
+    "#007bff",  # blue    → top shape 1
+    "#fd7e14",  # orange  → top shape 2
+    "#6f42c1",  # purple  → top shape 3
+    "#d9534f",   # red     → top shape 5
+    "#4bbf73"  # green    → top shape 4
+    
+]
 for s in final_shapes:
     source_data[s] = shape_counts[s].values
 source = ColumnDataSource(source_data)
@@ -164,137 +173,150 @@ Another way of looking at this plot is using a pie-chart.
 #| message: false
 from bokeh.io import output_notebook, show
 from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource, Slider, CustomJS
-from bokeh.layouts import column
-from bokeh.palettes import Category20
+from bokeh.models import ColumnDataSource, Slider, CustomJS, Div
+from bokeh.layouts import column, row
 import pandas as pd
 import numpy as np
 from math import pi, cos, sin
-from IPython.core.display import HTML as Center
-
-Center(""" <style>
-.output_png {
-    display: table-cell;
-    text-align: center;
-    vertical-align: middle;
-}
-</style> """)
 
 output_notebook(hide_banner=1)
 
-
-
+# === Load and preprocess data ===
 df = pd.read_csv('data/complete.csv', on_bad_lines='skip', dtype=str)
 df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
 df = df.dropna(subset=['datetime'])
-df['year']  = df['datetime'].dt.year.astype(int)
+df['year'] = df['datetime'].dt.year.astype(int)
 df['shape'] = df['shape'].fillna('UNKNOWN').str.upper()
 df = df[(df['year'] >= 1990) & (df['year'] <= 2014)]
-# — assume your df is already loaded & cleaned as before, and you have years, top_shapes, color_map —
+df = df[df['shape'] != 'OTHER']  # ✅ REMOVE "OTHER" COMPLETELY
 
-# Build per‐year angles + label coords
+# === Determine top shapes ===
 years = list(range(1990, 2015))
 top_shapes = set()
 for y in years:
-    cnts = df[df['year']==y]['shape'].value_counts()
+    excluded_shapes = {'CIGAR', 'FORMATION',"RECTANGLE"}
+    cnts = df[(df['year'] == y) & (~df['shape'].isin(excluded_shapes))]['shape'].value_counts()
     top_shapes |= set(cnts.index[:7])
 top_shapes = sorted(top_shapes)
 
-palette = Category20[20]
-color_map = {shape: palette[i % len(palette)] for i, shape in enumerate(top_shapes)}
-color_map['Uncommon Shapes'] = "#b0b0b0"
+# === Emoji & Color Map ===
+emoji_map = {
+    'CIRCLE': '⭕',
+    'DISK': '💿',
+    'FIREBALL': '🔥',
+    'LIGHT': '💡',
+    'OVAL': '🥚',
+    'SPHERE': '🔵',
+    'TRIANGLE': '🔺',
+    'UNKNOWN': '❓',
+    'Uncommon Shapes': '🛸'
+}
 
-color_map = {shape: palette[i % len(palette)] for i, shape in enumerate(top_shapes)}
-color_map['Uncommon Shapes'] = "#b0b0b0"
+# ✅ MANUAL COLOR ASSIGNMENT (customize here)
+color_map = {
+    'CIRCLE': "#6610f2",
+    'DISK': "#1f9bcf",
+    'FIREBALL': "#d9534f",
+    'LIGHT': "#007bff",
+    'OVAL': "#6f42c1",
+    'SPHERE': "#20c997",
+    'TRIANGLE': "#fd7e14",
+    'UNKNOWN': "#4bbf73",
+    'Uncommon Shapes': "#f0ad4e"
+}
 
+# === Prepare data per year ===
 data_by_year = {}
 for y in years:
-    cnts      = df[df['year']==y]['shape'].value_counts()
-    top7      = cnts.iloc[:7]
-    uncommon  = cnts.iloc[7:].sum()
-    labels    = list(top7.index)
-    values    = list(top7.values)
-    if uncommon>0:
+    cnts = df[df['year'] == y]['shape'].value_counts()
+    top7 = cnts.iloc[:7]
+    uncommon = cnts.iloc[7:].sum()
+    labels = list(top7.index)
+    values = list(top7.values)
+    if uncommon > 0:
         labels.append('Uncommon Shapes')
         values.append(uncommon)
     total = sum(values)
 
-    # wedge angles
-    angles = [v/total * 2*pi for v in values]
-    starts = np.cumsum([0]+angles[:-1])
-    ends   = starts + angles
+    angles = [v / total * 2 * pi for v in values]
+    starts = np.cumsum([0] + angles[:-1])
+    ends = starts + angles
+    mids = starts + np.array(angles) / 2
 
-    # mid‐angle, for label pos
-    mids   = starts + np.array(angles)/2
-    x_pct  = 0.5 * np.cos(mids)
-    y_pct  = 1   + 0.5 * np.sin(mids)
-    pct_text = [f"{v/total*100:1.1f}%" for v in values]
+    x_inner = 0.6 * np.cos(mids)
+    y_inner = 1 + 0.6 * np.sin(mids)
 
-    # optional: shape names outside
-    x_lab  = 1.05 * np.cos(mids)
-    y_lab  = 1    + 1.05 * np.sin(mids)
+    pct_vals = [v / total * 100 for v in values]
+    emoji_pct = [
+        f"{emoji_map.get(lbl, '')}\n{p:.1f}%" if p >= 10 else f"{emoji_map.get(lbl, '')}"
+        for lbl, p in zip(labels, pct_vals)
+    ]
 
     data_by_year[str(y)] = {
         'start_angle': starts.tolist(),
-        'end_angle':   ends.tolist(),
-        'color':       [color_map[l] for l in labels],
-        'label':       labels,
-        'pct_text':    pct_text,
-        'x_pct':       x_pct.tolist(),
-        'y_pct':       y_pct.tolist(),
-        'x_lab':       x_lab.tolist(),
-        'y_lab':       y_lab.tolist(),
+        'end_angle': ends.tolist(),
+        'color': [color_map.get(lbl, "#cccccc") for lbl in labels],
+        'emoji_pct': emoji_pct,
+        'x_inner': x_inner.tolist(),
+        'y_inner': y_inner.tolist(),
+        'label': labels
     }
 
-# Initial year
+# === Initial Year Setup ===
 initial = years[0]
-src     = ColumnDataSource(data_by_year[str(initial)])
+src = ColumnDataSource(data_by_year[str(initial)])
 
-p = figure(height=640, width=640,
+# === Figure ===
+p = figure(height=460, width=458,
            title=f"UFO Shapes in {initial}",
            toolbar_location=None,
-           x_range=(-1.2,1.2), y_range=(0,2.2))
+           x_range=(-1.2, 1.2), y_range=(0, 2.4),background_fill_color="#f5f5f5")
 
-# draw wedges
-p.wedge(x=0, y=1, radius=0.8,
+p.wedge(x=0, y=1, radius=0.9,
         start_angle='start_angle', end_angle='end_angle',
         fill_color='color', line_color='white',
         source=src)
 
-# draw % texts inside
-p.text(x='x_pct', y='y_pct', text='pct_text',
+p.text(x='x_inner', y='y_inner', text='emoji_pct',
        source=src,
        text_align='center', text_baseline='middle',
-       text_font_size='9pt')
-
-# draw shape names outside
-p.text(x='x_lab', y='y_lab', text='label',
-       source=src,
-       text_align='center', text_baseline='middle',
-       text_font_size='9pt', text_font_style='bold')
+       text_font_size='12pt')
 
 p.axis.visible = False
 p.grid.visible = False
+p.xaxis.axis_line_color= "#333333"
+# === Slider ===
+slider = Slider(start=years[0], end=years[-1], value=initial, step=1, title="Year")
 
-# slider + callback
-slider = Slider(start=years[0], end=years[-1],
-                value=initial, step=1, title="Year")
-
-callback = CustomJS(args=dict(src=src,
-                              data_by_year=data_by_year,
-                              plot=p,
-                              slider=slider), code="""
+callback = CustomJS(args=dict(src=src, data_by_year=data_by_year, plot=p, slider=slider), code="""
     const yr = slider.value.toString();
-    const d  = data_by_year[yr];
+    const d = data_by_year[yr];
     src.data = d;
     plot.title.text = 'UFO Shapes in ' + yr;
     src.change.emit();
 """)
 slider.js_on_change('value', callback)
 
-show(column(slider, p))
-```
+# === Legend as HTML (aligned beside the chart) ===
+legend_html = "<div style='font-size: 14px; line-height: 1.6em;'>"
+for shape in top_shapes + ['Uncommon Shapes']:
+    emoji = emoji_map.get(shape, '')
+    color = color_map.get(shape, '#999999')
+    label = shape.lower()
+    legend_html += f"""
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+            <div style="width: 14px; height: 14px; background-color: {color}; border-radius: 3px; flex-shrink: 0;"></div>
+            <span>{emoji} {label}</span>
+        </div>
+    """
+legend_html += "</div>"
+legend_div = Div(text=f"<div style='margin-left:20px; margin-top:30px'>{legend_html}</div>", width=160)
 
+# === Layout ===
+layout = column(slider, row(p, legend_div))
+show(layout)
+
+```
 Above we have a time-series plot that shows the number of sightings in the US throughout 1990-2014. Overall we see a growing number of sightings throughout the years. It is although observed that around 2013-2014 that the number of sightings drastically decreased. This is due to the dataset cutting of approx. mid September 2013, which is the primary reason for the drop in sightings. Overall on the graph we observe a maximum peak at around 2012-2013 indicating that more people than ever are observing UFO's. On Astronomy's article 'Reports of rising UFO sightings are greatly exaggerated' they mention that due to the lack of a mechanical shutter on the camera of our cellular device, artifacts may blur or smear and alter the observations. In 2012 there was also something known as the '2012 phenomenon' where there was beliefs going around about judgement, rebirth etc. and that some planet (known as Planet X) would pass/collide by/with earth. These beliefs have very likely influenced peoples perceptions and made them more susceptible to imagine things. These factors might have been contributor to the increase in sightings around 2012-2013.
 
 
@@ -337,8 +359,13 @@ plt.figure().set_figwidth(7.5)
 ax=plt.gca()
 plt.xticks(np.arange(0, 25, 1))
 ax.set_facecolor("#f5f5f5")
+
+
+#ax.xaxis.grid(False)
+#ax.grid(True,axis="y", zorder=1)
 hourtime=df["time"]=df["datetime"].dt.hour
-plt.hist(hourtime, bins=24, range=(0, 24), density=0, alpha=0.5, color='blue',)
+plt.hist(hourtime, bins=24, range=(0, 24), density=0, color='#007bff',zorder=4)
+ax.grid(True, axis="y",linestyle='-', alpha=0.7,color="#222244",zorder=0)
 plt.xlim(0,24)
 plt.xlabel('Hour of the Day')
 plt.show()
@@ -401,9 +428,9 @@ for index, row in milbasesl[milcomp == "AF Reserve"].iterrows():
     folium.CircleMarker(
         location=[row['latitude'], row['longitude']],
         radius=3,
-        color='magenta',
+        color='#6610f2',
         fill=True,
-        fill_color='magenta',
+        fill_color='#6610f2',
         fill_opacity=0.6
     ).add_to(map_hooray)
 
@@ -411,9 +438,9 @@ for index, row in milbasesl[milcomp == "AF Active"].iterrows():
     folium.CircleMarker(
         location=[row['latitude'], row['longitude']],
         radius=3,
-        color='red',
+        color='#007bff',
         fill=True,
-        fill_color='red',
+        fill_color='#007bff',
         fill_opacity=0.6
     ).add_to(map_hooray)
 
@@ -421,9 +448,9 @@ for index, row in milbasesl[milcomp == "AF Guard"].iterrows():
     folium.CircleMarker(
         location=[row['latitude'], row['longitude']],
         radius=3,
-        color='green',
+        color='#09772f',
         fill=True,
-        fill_color='green',
+        fill_color='#09772f',
         fill_opacity=0.6
     ).add_to(map_hooray)
 
@@ -457,10 +484,9 @@ template = """
 <div class='legend-title'>Legend</div>
 <div class='legend-scale'>
   <ul class='legend-labels'>
-    <li><span style='background:red;opacity:0.7;'></span>AF Active</li>
-    <li><span style='background:magenta;opacity:0.7;'></span>AF Reserve</li>
-    <li><span style='background:green;opacity:0.7;'></span>AF Guard</li>
-    <li><span style='background:#000000;opacity:0.7;'></span>Heatmap Intensity</li>
+    <li><span style='background:#6610f2;opacity:0.7;'></span>AF Active</li>
+    <li><span style='background:#007bff;opacity:0.7;'></span>AF Reserve</li>
+    <li><span style='background:#09772f;opacity:0.7;'></span>AF Guard</li>
   </ul>
 </div>
 </div>
@@ -568,10 +594,18 @@ merged = pd.merge(data, sightings_summary, on=['state', 'year']).dropna(subset=[
 merged['population'] = merged['population'] / 1_000_000
 # Use a colorblind-friendly palette
 colorblind_palette = [
-    "#332288", "#88CCEE", "#44AA99", "#117733", "#999933",
-    "#DDCC77", "#CC6677", "#882255", "#AA4499", "#661100",
-    "#6699CC", "#888888"
+    "#007bff",  # blue
+    "#6610f2",  # indigo
+    "#6f42c1",  # purple
+    "#e83e8c",  # pink
+    "#d9534f",  # red
+    "#fd7e14",  # orange
+    "#f0ad4e",  # yellow
+    "#4bbf73",  # green
+    "#20c997",  # teal
+    "#1f9bcf"   # cyan
 ]
+
 extended_palette = (colorblind_palette * ((len(all_states) // len(colorblind_palette)) + 1))[:len(all_states)]
 state_color_map = dict(zip(all_states, extended_palette))
 
@@ -584,7 +618,7 @@ source = ColumnDataSource(merged)
 p = figure(title="UFO Sightings vs Population (1950–2014)",
            x_axis_label="Population", y_axis_label="Number of Sightings",
            tools="pan,wheel_zoom,box_zoom,reset,tap,hover",
-           width=640, height=600)
+           width=640, height=600,background_fill_color="#f5f5f5")
 
 # Draw points
 p.circle('population', 'num_sightings',
@@ -709,15 +743,17 @@ for year in sorted(merged['year'].unique()):
     }
 
 # Bokeh plotting
-initial_year = str(sorted(merged['year'].unique())[0])
+initial_year = "1987"
 source = ColumnDataSource(data=year_data[initial_year])
 
 p = figure(height=400, width=640,
            title=plot_meta[initial_year]['title'],
            x_axis_label='Population (per milion)', y_axis_label='Number of Sightings',background_fill_color="#f5f5f5")
 
-p.circle('x', 'y', size=8, source=source)
-p.line('x', 'y_pred', source=source, line_width=2, color='red')
+p.circle('x', 'y', size=8, source=source,color="#007bff")
+p.line('x', 'y_pred', source=source, line_width=2, 
+color='#d9534f')
+
 #p.legend.location = "top_left"
 
 # Slider and JS Callback
