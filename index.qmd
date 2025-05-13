@@ -15,9 +15,13 @@ Since the beginning of the 20th century we have reported UFO sightings. What thi
 ### Time series plot
 If we look at the develpoment of sightigns over time. We choose to look at only the sightings from 1990 and further since the number of sightings is low that there is no meaningful insight to gain.
 ```{python}
+#| label: fig-times_series_plot
+#| fig-cap: "Times series plot which shows the distribution of the different shapes and sightings, but also highlights some important dates in regards to media releases"
+#| layout-ncol: 1
 #| error: false
 #| warning: false
 #| message: false
+
 import pandas as pd
 from bokeh.plotting import figure, show
 from bokeh.io import output_notebook
@@ -148,14 +152,14 @@ p.add_layout(LabelSet(
 # === Styling ===
 p.xaxis.axis_label            = "Year"
 p.yaxis.axis_label            = "Sightings"
-p.xaxis.major_label_text_color = "#cccccc"
-p.yaxis.major_label_text_color = "#cccccc"
-p.xaxis.axis_line_color       = "#333333"
-p.yaxis.axis_line_color       = "#333333"
+p.xaxis.major_label_text_color = "#000"
+p.yaxis.major_label_text_color = "#000"
+p.xaxis.axis_line_color       = "#000"
+p.yaxis.axis_line_color       = "#000"
 p.xgrid.grid_line_color       = None
 p.ygrid.grid_line_color       = "#222244"
-p.title.text_color            = "#eeeeee"
-p.title.text_font_size        = "16pt"
+p.title.text_color            = "#000"
+p.title.text_font_size        = "12pt"
 p.legend.label_text_color     = "#000000"
 p.legend.background_fill_alpha=  1
 p.legend.location             = "top_left"
@@ -168,6 +172,8 @@ show(p)
 Another way of looking at this plot is using a pie-chart.
 
 ```{python}
+#| label: fig-pie-chart
+#| fig-cap: "A pie chart of the different shapes of sightings over the years"
 #| error: false
 #| warning: false
 #| message: false
@@ -342,6 +348,8 @@ https://www.cbc.ca/news/world/record-british-ufo-sightings-in-1990s-1.817993
 
 ### Hour of the day
 ```{python}
+#| label: fig-hour-chart
+#| fig-cap: "This figure shows the the number of sightings per hour. It is clear that the sightings are mostly a thing of the evening/night"
 #| error: false
 #| warning: false
 #| message: false
@@ -378,6 +386,8 @@ Why 22:00 in particular? It appears to represent an optimal balance. By this hou
 
 ### Heatmap 
 ```{python}
+#| label: fig-heatmap
+#| fig-cap: "A heatmap over the sightings. Where we have included the location of different military air force bases. It seems that there often are a lot of sightings around big cities which also sometimes have airforce bases. But sometimes places where there is only airforce bases also sees an increase in sightings"
 #| error: false
 #| warning: false
 #| message: false
@@ -556,6 +566,8 @@ We suspect the reason between this great disparity, is most likely population si
 ### Correlation between 
  We want to investigate if there is this correlation between 
 ```{python}
+#| label: fig-corr-big
+#| fig-cap: "A chart which shows the UFO sightings over population over the last from 1950 to 2014. The different states are highligthed with different colors. One sees that there is a lot of smaller populations which does not have that many sightings. One also sees that some states have seen a major increase in sigthings even though there population remained rather stable"
 #| error: false
 #| warning: false
 #| message: false
@@ -659,6 +671,8 @@ taptool.callback = tap_callback
 show(p)
 ```
 ```{python}
+#| label: fig-corr-small
+#| fig-cap: "A correlation plot over the years looking at the different states population and sightings for a chosen year. We see a rather strong correlation between the two"
 #| error: false
 #| warning: false
 #| message: false
