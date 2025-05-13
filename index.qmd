@@ -773,7 +773,7 @@ slider.js_on_change('value', callback)
 
 show(column(slider, p))
 ```
-**Figure 6:**A correlation plot over the years looking at the different states population and sightings for a chosen year. We see a rather strong correlation between the two for most years. This in turn explains our heatmap
+**Figure 6:** A correlation plot over the years looking at the different states population and sightings for a chosen year. We see a rather strong correlation between the two for most years. This in turn explains our heatmap
 
 An examination of Figures 5 and 6 supports the hypothesis that reported UFO sightings are positively correlated with population size. This relationship is most evident in the year 2008, which shows the highest correlation coefficient of 0.96 between state population and the number of reported sightings. In contrast, the year 1951 exhibits the lowest correlation, with a coefficient of just 0.34. But this might as well be because of a lack of datapoints. Overall, the early years of the dataset, particularly the first two decades, display a relatively weak correlation between population and sightings. However, beginning in the 1970s, the correlation becomes significantly stronger and more consistent.
 
