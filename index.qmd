@@ -10,7 +10,7 @@ jupyter: python3
 ---
 Since the beginning of the 20th century we have reported UFO sightings. What this project is trying to do is to look at the trend of the UFO sightings and try to explain them in a way which is not attributed to an increase in actual UFOs. Since a major part of the sightings are in the US (which already indicates that something weird is up) we are only focusing on that part of the data.
 
-### Time series plot
+### UFO sightings over time
 The first thing we want to examine is the trend of UFO sightings over the years. We choose to look at only the sightings from 1990 and further since the number of sightings is fairly low up until that point and therefore there is no meaningful insight to gain. We also look at the particular shapes of sighings and lastly we plotted some important UFO related media too see if they might contribute to the increase.
 ```{python}
 #| error: false
@@ -330,7 +330,9 @@ To understand the broader pattern of increasing sightings from the 1990s to the 
 
 Additionally, the influence of pop culture is clearly visible. Markers on the time-series plot indicate the release of major alien-themed media, such as The X-Files and Independence Day. These releases coincide with noticeable spikes in UFO sightings, suggesting that media exposure may influence public perception and increase observational activity. This idea is supported by a CBC article titled “Record British UFO sightings in 1990s” @cbc_british_ufo_sightings which asserts that such media events raise public awareness and curiosity, leading to more frequent UFO reports.
 
-### Hour of the day
+### Number of sightings per hour 
+
+What happens when we shift our focus to when these sightings occur throughout the day? 
 ```{python}
 
 #| error: false
@@ -346,7 +348,8 @@ df = df.dropna(subset=['datetime'])
 df = df.sort_values(by='datetime').reset_index(drop=True)
 df=df.dropna()
 
-plt.figure().set_figwidth(7.5)
+plt.figure().set_figwidth(7)
+plt.title("Number of sightings per hour ")
 ax=plt.gca()
 plt.xticks(np.arange(0, 25, 1))
 ax.set_facecolor("#f5f5f5")
@@ -359,17 +362,17 @@ plt.hist(hourtime, bins=24, range=(0, 24), density=0, color='#007bff',zorder=4)
 ax.grid(True, axis="y",linestyle='-', alpha=0.7,color="#222244",zorder=0)
 plt.xlim(0,24)
 plt.xlabel('Hour of the Day')
+plt.ylabel("Population")
 plt.show()
 ```
 **Figure 3:** This figure shows the the number of sightings per hour. It is clear that the sightings are mostly a thing of the evening/night. This also makes sense considering that a lot of the sightings are light.
 
-What happens when we shift our focus to when these sightings occur throughout the day?
 
 As shown in Figure 3, the majority of sightings are clustered between 20:00 and 24:00, with a noticeable peak at 22:00. Several factors might account for this trend. Referring back to Figure 2, we see that the most commonly reported UFO shape is simply described as “light.” This aligns neatly with what we might expect after all, the stark contrast between a dark night sky and any bright object makes such lights far more noticeable. It is the same principle, that makes stars visible at night.
 
 Why 22:00 in particular? It appears to represent an optimal balance. By this hour, the sky is fully dark, providing ideal conditions for spotting shining objects against a dark backdrop. At the same time, it is still within a reasonable timeframe when many people are likely to be outdoors. In contrast, sightings tend to decline past midnight, likely due to reduced human presence and decreased observational activity during the early morning hours.
 
-### Heatmap 
+### Sightings heatmap together with airforce bases
 Now we want to explore a different angle, we therefore wish to plot the geographical data. This results in a heat map. Along with the sighting distribution the heat map also contains airforce bases, in order to explore Air Force flights influence on UFO sightings. We suspect that aircrafts in particular might often be mistaken for UFO and in particular aircrafts from military bases. Since the often travel in more secrecy and might not have the usual look of an airplane.The heat map will only contain Air Force bases, despite other branches of the U.S Military containing aircraft, due to simplicity as it would be impossible to distinguish between an Army Airbase, and an regular infantry base. 
  
 ```{python}
@@ -547,7 +550,7 @@ Another notable observation from Figure 4 is the clear disparity in the density 
 We suspect the reason between this great disparity, is most likely population size and density. As we mentioned two large areas of the west ie. The Rocky Mountains and Great Basin has almost no sightings reported. These two areas are also very sparsely populated, while coastal and urban centers such as Los Angeles, San Francisco, Seattle, Salt Lake City and Denver still report large amounts of sightings. This could indicate that reported UFO sightings are correlated with population size and maybe not so much correlated with military bases. It is also a bit difficult to see this since a lot of the military bases are around cities. We still see states with low population, which has spikes of sightings around military bases but not a significant amount enough to be conclusive about.
 
 
-### Correlation between 
+### Correlation between population and UFO sightings
 The heatmap suggest that there is a fairly stark correlation between population and number of sigtings. This is something we want look into in the following plots. First we take a look at the correlation between populaton and sighitngs for all states and years.
 ```{python}
 
