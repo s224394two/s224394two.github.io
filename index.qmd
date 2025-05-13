@@ -1,6 +1,6 @@
 ---
 title: "What is the cause of the increase in UFO sightings?"
-
+bibliography: references.bib
 from: markdown+emoji
 format:
   html:
@@ -9,15 +9,11 @@ jupyter: python3
 ---
 ## And can we see it in the data?
 
-
-Since the beginning of the 20th century we have reported UFO sightings. What this project is trying to do is to look at the trend of the UFO sightings and try to explain them in a way which is not attributed to an increase in actual UFOs. Since a major part of the sightings are in the US (which already debunks the idea of UFOs actually being aliens) we are only focusing on that data.
+Since the beginning of the 20th century we have reported UFO sightings. What this project is trying to do is to look at the trend of the UFO sightings and try to explain them in a way which is not attributed to an increase in actual UFOs. Since a major part of the sightings are in the US (which already indicates that something is weird is up) we are only focusing on that part of the data.
 
 ### Time series plot
-If we look at the develpoment of sightigns over time. We choose to look at only the sightings from 1990 and further since the number of sightings is low that there is no meaningful insight to gain.
+The first thing we want to examine is the trend of UFO sightings over the years. We choose to look at only the sightings from 1990 and further since the number of sightings is fairly low up until that point and therefore there is no meaningful insight to gain. We also look at the particular shapes of sighings and lastly we plotted some important UFO related media too see if they might contribute to the increase.
 ```{python}
-#| label: fig-times_series_plot
-#| fig-cap: "Times series plot which shows the distribution of the different shapes and sightings, but also highlights some important dates in regards to media releases"
-#| layout-ncol: 1
 #| error: false
 #| warning: false
 #| message: false
@@ -168,12 +164,11 @@ p.legend.label_text_font_size = "9pt"
 # Show it
 show(p)
 ```
+**Figure 1:** Times series plot which shows the distribution of the different shapes and sightings, but also highlights some important dates in regards to media releases. There has been a rather large increase over the year. In particular after the realase of "independence day" and the the show x-files.
 
-Another way of looking at this plot is using a pie-chart.
+To more clearly see the distribution of the different shapes over the years we also look at a pie-chart. 
 
 ```{python}
-#| label: fig-pie-chart
-#| fig-cap: "A pie chart of the different shapes of sightings over the years"
 #| error: false
 #| warning: false
 #| message: false
@@ -323,14 +318,13 @@ layout = column(slider, row(p, legend_div))
 show(layout)
 
 ```
+**Figure 2:** The pie-chart shows the different shapes of the reported UFOs. Uncommon shapes means the sum of all the different shapes which are to few to be their own category and is therefore the biggest most of the time. But the real biggest category is light. This makes one suspect that a lot of the sightings may be from air craft 
+
+
 Above we have a time-series plot that shows the number of sightings in the US throughout 1990-2014. Overall we see a growing number of sightings throughout the years. It is although observed that around 2013-2014 that the number of sightings drastically decreased. This is due to the dataset cutting of approx. mid September 2013, which is the primary reason for the drop in sightings. Overall on the graph we observe a maximum peak at around 2012-2013 indicating that more people than ever are observing UFO's. On Astronomy's article 'Reports of rising UFO sightings are greatly exaggerated' they mention that due to the lack of a mechanical shutter on the camera of our cellular device, artifacts may blur or smear and alter the observations. In 2012 there was also something known as the '2012 phenomenon' where there was beliefs going around about judgement, rebirth etc. and that some planet (known as Planet X) would pass/collide by/with earth. These beliefs have very likely influenced peoples perceptions and made them more susceptible to imagine things. These factors might have been contributor to the increase in sightings around 2012-2013.
 
 
-On the plot we also see frequency distribution of the UFO shapes that people have observed throughout 1990-2014 where we can more easily observe the distributions on the plot to the right. 
-
 Here we have a pi-chart that shows the distribution of UFO shapes more clearly through the years. We observe that the ratio of reported shapes seems to remain relatively unchanged however observe a huge spike around 1995 for unknown shapes.
-
-Lets now look at the bigger picture as to what might have caused such surges in sightings throughout the 90's till 2010's. Looking at the 'ICAO - World Aviation and the World Economy', despite not directly showing an increase in number of flights, but it is indirectly implied as the 'Revenue Passenger-Kilometres' increases drastically throughout the years. This might show the overall trend of increase in sightings, as the higher the number of air-vehicles increases the likelihood of assuming they are UFO's. On the time-series plot there are yellow dots at certain years. These dots show the release of some major alien movies. We observe that close to release of 'X-files' and especially 'Independence Day' the number of sightings dramatically increased within the span of a year. This might imply that pop-culture makes people see the skies a little differently. In the article 'Record British UFO sightings in 1990s' by CBC, where they emphasize that films and TV (Here mentioning X-files and Independence day) has raised the publics awareness of UFO's which would lead to an increase in UFO reports as people would engage with the skies more often.
 
 Kilder:
 
@@ -387,10 +381,11 @@ Why 22:00 in particular? It appears to represent an optimal balance. By this hou
 ### Heatmap 
 ```{python}
 #| label: fig-heatmap
-#| fig-cap: "A heatmap over the sightings. Where we have included the location of different military air force bases. It seems that there often are a lot of sightings around big cities which also sometimes have airforce bases. But sometimes places where there is only airforce bases also sees an increase in sightings"
 #| error: false
 #| warning: false
 #| message: false
+# Where we have included the location of different military air force bases. It seems that there often are a lot of sightings around big cities which also sometimes have airforce bases. But sometimes places where there is only airforce bases also sees an increase in sightings"
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -672,7 +667,6 @@ show(p)
 ```
 ```{python}
 #| label: fig-corr-small
-#| fig-cap: "A correlation plot over the years looking at the different states population and sightings for a chosen year. We see a rather strong correlation between the two"
 #| error: false
 #| warning: false
 #| message: false
@@ -790,7 +784,7 @@ slider.js_on_change('value', callback)
 show(column(slider, p))
 ```
 
-
+#| fig-cap: "A correlation plot over the years looking at the different states population and sightings for a chosen year. We see a rather strong correlation between the two"
 
 An examination of Figures 4 and 5 supports the hypothesis that reported UFO sightings are positively correlated with population size. This relationship is most evident in the year 2008, which shows the highest correlation coefficient of 0.96 between state population and the number of reported sightings. In contrast, the year 1951 exhibits the lowest correlation, with a coefficient of just 0.34. Overall, the early years of the dataset, particularly the first two decades, display a relatively weak correlation between population and sightings. However, beginning in the 1970s, the correlation becomes significantly stronger and more consistent.
 
