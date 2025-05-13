@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Motivation – Social data analysis and visualization project</title>
+<title> Motivation  – Social data analysis and visualization project</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -108,26 +108,17 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#basic-stats" id="toc-basic-stats" class="nav-link active" data-scroll-target="#basic-stats">Basic Stats</a></li>
-  <li><a href="#data-analysis" id="toc-data-analysis" class="nav-link" data-scroll-target="#data-analysis">Data Analysis</a></li>
-  <li><a href="#genre.-which-genre-of-data-story-did-you-use" id="toc-genre.-which-genre-of-data-story-did-you-use" class="nav-link" data-scroll-target="#genre.-which-genre-of-data-story-did-you-use">Genre. Which genre of data story did you use?</a></li>
-  <li><a href="#visualizations" id="toc-visualizations" class="nav-link" data-scroll-target="#visualizations">Visualizations</a></li>
-  <li><a href="#discussion.-think-critically-about-your-creation" id="toc-discussion.-think-critically-about-your-creation" class="nav-link" data-scroll-target="#discussion.-think-critically-about-your-creation">Discussion. Think critically about your creation</a></li>
-  <li><a href="#contributions.-who-did-what" id="toc-contributions.-who-did-what" class="nav-link" data-scroll-target="#contributions.-who-did-what">Contributions. Who did what?</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Motivation</h1>
+<h1 class="title"><center><br>
+Motivation<br>
+</center></h1>
 </div>
 
 
@@ -144,36 +135,35 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p><strong>What is your dataset?</strong></p>
+<p><strong>The dataset</strong></p>
 <p>This project contains several datasets, in order to explore the phenomena of UFO sightings through multiple lenses. The first and main dataset is the NUFORC UFO Sightings dataset, sourced from the National UFO Reporting Center and hosted on Kaggle, comprises around 80,000 individual reports of unidentified flying object (UFO) sightings. These records span more than a century, offering a foundation for both quantitative and qualitative analysis of UFO sightings. The second dataset this project contains is covering US military bases, it contains 776 entries, and 10 attributes, describing the location, the name of the base and the branch of service which the base is tied to. The third and last dataset used, is a dataset over historic populations in the different US States.</p>
-<p><strong>Why did you choose this/these particular dataset(s)?</strong></p>
+<p><strong>Motivation for this particular dataset</strong></p>
 <p>The interest in this dataset arises from a foundation of scientific curiosity. UFO sightings have long been a hot bed of conspiracy theory ranging from alleged extraterrestrial encounters to secret government projects. At the same time, they have played a prominent role in popular culture, featured in iconic films and television shows such as The X-Files, Close Encounters of the Third Kind, E.T., and The Thing, among many others. This makes the study of UFO reports not only intriguing but also culturally significant. We are particularly excited about the opportunity to explore these sightings through both quantitative and qualitative analysis. Regardless of whether one is a skeptic or a true believer, there is no denying the existence of UFOs in the strict sense of the term; Unidentified Flying Objects observed by individuals looking up at the sky. This dataset offers a substantial sample size spanning multiple decades and includes several key attributes that provide strong insights into these encounters. These include the reported shape of the object, geographic coordinates, state annotations, the duration of each sighting, and the year of occurrence. The militaray base dataset is interesting due to the coupling with government projects, such as air force experiemental flyings. The military base dataset is interesting because it is linked to government projects, such as experimental flights by the Air Force. The historic state population dataset, is interesting due to the correlation between popualtion and UFO sights.</p>
-<p><strong>What was your goal for the end user’s experience?</strong></p>
+<p><strong>Goal for user experience</strong></p>
 <p>Our goal is to provide an engaging and informative experience that encourages critical thinking about UFO sightings. By taking a skeptical perspective, we aim to help users explore alternative explanations for sightings—such as proximity to military bases or population density. Through tools like heat maps and time series visualizations, we wanted users to interact with the data and uncover patterns that might suggest grounded, non-extraterrestrial causes for reported sightings.</p>
-<section id="basic-stats" class="level3">
-<h3 class="anchored" data-anchor-id="basic-stats">Basic Stats</h3>
+###
+<center>
+Basic Stats
+</center>
 <p><strong>Write about your choices in data cleaning and preprocessing</strong></p>
 <p>For the UFO sightings dataset, our first decision was to filter out all entries outside the United States. This choice was based on two main reasons. First, the vast majority of sightings approximately 74,000 out of 80,000 occurred within the U.S., making it the most relevant and data-rich region for analysis. Second, this allowed us to narrow the scope of the project to a more manageable and consistent geographic focus.</p>
 <p>In the military base dataset, we further refined the data to include only U.S. Air Force bases. While all branches of the military operate aircraft, the Air Force is uniquely dedicated to aeronautics. Additionally, it would be difficult to reliably distinguish between different types of army bases (e.g., infantry vs.&nbsp;air units), making the Air Force the most suitable focus for this analysis. We removed all rows containing missing (NaN) values from each dataset.</p>
-<p><strong>Write a short section that discusses the dataset stats, containing key points/plots from your exploratory data analysis</strong> A lot of the data does not any obvious dataset stats like median, mean or standard deviation. This is because its often things like states, coordinates, or dates of of reporting. Alot of the explorative data analysis came from the plots we ended up showing. Where as we just made the plots cleaner and interactive. An example could be the heat map. Where we just had to create the heat map in order to see if our hypothesis were correct. <img src="../dummybilleder/heatmap.png" class="img-fluid" alt="alt text"></p>
-<p>One of the more explorative data analysis we did was with the hour of day plot which we did plot to see if there were anything of interest.<img src="../dummybilleder/hour.png" class="img-fluid" alt="alt text"></p>
-<p>For population the interesting thing was not much nescessarily the population but the correlation between the population and the UFO sightings. The big plot which included all the datapoints about population and ufo sightings were actually also explorative since we wanted to see if there were anything interesting about the correlation.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="../dummybilleder/corr.png" class="img-fluid figure-img"></p>
-<figcaption>alt text</figcaption>
-</figure>
-</div>
-</section>
-<section id="data-analysis" class="level3">
-<h3 class="anchored" data-anchor-id="data-analysis">Data Analysis</h3>
-<p>Our types of data analysis can be categorised into two categories. Trying to plot data from which we can see a trend or trying to find a correlation between data. We wanted to see if we could find a trend in the number of UFO sightings. We wanted to see if there was a trend in regards to airforce bases and we wanted to there was a trend of when the sightings happened. From this we got suspesison that there was a correlation between the number of UFO sightings and the population of the states. Which we then wanted to look further into by calclating the correlation coefficient.</p>
-<p>We learned that the number of sightings have been increasing over the years and that some signinficant media releases might have had an impact on increasing the number of sightings. We did also find out that our hypothesis about airforce bases and UFO sightings might not have that correect and that the explanation might more so be because of the population of the different states and the fact that airforce bases are often located in more populated areas.</p>
+<p><strong>Write a short section that discusses the dataset stats, containing key points/plots from your exploratory data analysis</strong></p>
+<p>A lot of the data does not any obvious dataset stats like median, mean or standard deviation. This is because its often things like states, coordinates, or dates of of reporting. Alot of the explorative data analysis came from the plots we ended up showing. Where as we just made the plots cleaner and interactive. An example could be the heat map. Where we just had to create the heat map in order to see if our hypothesis were correct. <img src="../dummybilleder/heatmap.png" class="img-fluid" alt="alt text"></p>
+<p>One of the more explorative data analysis we did was with the hour of day plot which we did plot to see if there were anything of interest. <img src="../dummybilleder/hour.png" class="img-fluid" alt="alt text"></p>
+<p>For population the interesting thing was not much necessarily the population but the correlation between the population and the UFO sightings. The big plot which included all the datapoints about population and ufo sightings were actually also explorative since we wanted to see if there were anything interesting about the correlation., <img src="../dummybilleder/corr.png" class="img-fluid" alt="alt text">”</p>
+###
+<center>
+Data Analysis
+</center>
+<p>Our types of data analysis can be categorized into two categories. Trying to plot data from which we can see a trend or trying to find a correlation between data. We wanted to see if we could find a trend in the number of UFO sightings. We wanted to see if there was a trend in regards to airforce bases and we wanted to there was a trend of when the sightings happened. From this we got suspicion that there was a correlation between the number of UFO sightings and the population of the states. Which we then wanted to look further into by calculating the correlation coefficient.</p>
+<p>We learned that the number of sightings have been increasing over the years and that some signinficant media releases might have had an impact on increasing the number of sightings. We did also find out that our hypothesis about airforce bases and UFO sightings might not have that correect and that the explanation might more so be because of the population of the different states and the fact that airforce bases are often located in more populated areas. ,</p>
 <p>We did also find out that the most common shape of UFOs are light and that they are often reported in the evening. This is not surprising since most people are awake during the evening and that the light is more visible in the dark.</p>
 <p>We did find out that there is a rather strong correaltion population and the number of UFO sightings.</p>
-</section>
-<section id="genre.-which-genre-of-data-story-did-you-use" class="level3">
-<h3 class="anchored" data-anchor-id="genre.-which-genre-of-data-story-did-you-use">Genre. Which genre of data story did you use?</h3>
+###
+<center>
+Genre
+</center>
 <p>This project lends itself naturally to a magazine-style format. Instead of simply representing af straightforward narative, it showcases a collection of interconnected visualisations, therefore it would also require some explanatory text, inbetween the visiaulations in order to discuss their meaning and relation.</p>
 <p><strong>Visual Narative</strong></p>
 <p>For visual structuring the project is structured using a consisten visual platform, it uses the same color scheme for all visualisations, through a consistent visual narrative.</p>
@@ -182,26 +172,81 @@ ul.task-list li input[type="checkbox"] {
 <p>This project employed linear ordering. The layout follows a linear structure, guiding the reader from top to bottom. Each section pairs explanatory text with its corresponding plot, encouraging readers to read, reflect on the visualization, and then move naturally to the next insight in the sequence.</p>
 <p>The project also used hover/highlighting in order to increase the information of each plot shown, for example in the correlation plots it is possible to observe which state, what year, and the number of sightings each datapoint represents. Using hover/highlighting it is possible to add this additional information without it adding more noise to the visualisation. Another interactivity method used was filetering, figure 5, allowing the reader to filter for states, in order to see correlation of a unique state.</p>
 <p>For messaging the project used captions for captions and annotations for every visualisation in order to simplify for the reader the information of the visualisation. Thereby we expect the reader can extrapolate more information more efficiently from each visualisation. The project has an introduction in order to clue the reader in on what this project will investigate, but also the motivation behind the investigation. Additionally, the visualizations are accompanied by a written article that offers further explanation, background, and interpretation to enhance the overall narrative.</p>
-</section>
-<section id="visualizations" class="level3">
-<h3 class="anchored" data-anchor-id="visualizations">Visualizations</h3>
-<p>Explain the visualizations you’ve chosen.</p>
-<p>Why are they right for the story you want to tell?</p>
-</section>
-<section id="discussion.-think-critically-about-your-creation" class="level3">
-<h3 class="anchored" data-anchor-id="discussion.-think-critically-about-your-creation">Discussion. Think critically about your creation</h3>
+###
+<center>
+Visualisations
+</center>
+<p>To explore a phenomenon as layered and speculative as UFO sightings, we chose visualizations that balance clarity with narrative richness. Each type serves a specific role in the overall investigation:</p>
+<p><strong>Time series plot (figure 1)</strong> were used to show the long-term trends of reported UFO sightings. Since the chosen time-series visualisation, is a stacked area chart, it serves a dual role by also giving a quick overview over the distribution of sighted shapes, allowing the reader to gain an easy overview over large parts of the dataset.</p>
+<p><strong>Pie chart (figure 2)</strong> offer an intuitive snapshot of the distribution of sighted shapes over the years. While the time series provides temporal trends, the pie chart simplifies the big picture, making it easier to compare shape frequency across the dataset. So in essence we use the stacked area chart for gaining an insightful quick overview, while using the pie chart for a deepdive, into the distribution of the sighted shapes over the years.</p>
+<p><strong>Hourly bar plots (figure 3)</strong> help us understand the behavior of sightings within a single day. The noticeable evening peak aligns with the dominance of light as a reported shape and adds context to how observational conditions influence reports.</p>
+<p><strong>Heat map (figure 4)</strong> allow us to visually explore the geography of sightings and their potential connection to air force bases. This spatial analysis highlights regional clustering and provides clues about the influence of local activity or population centers.</p>
+<p><strong>Scatter plots and correlation graphs (figure 5 and 6)</strong> were included to rigorously test the relationship between sightings and population size. These visualizations help bridge anecdotal patterns with measurable trends, giving weight to the hypothesis that UFO reports track more closely with where people live than with where “unknowns” actually appear.</p>
+<p>By using a mix of visual formats each suited to its data type we aim to provide both depth and accessibility, inviting readers to move from broad overviews to more detailed interpretations, all while staying grounded in the data.</p>
+###
+<center>
+Discussion
+</center>
 <p>What went well?</p>
 <p>We think that we extrapolated quite a lot of information from the UFO sightings data. By comparing sightings to movie releases, correlating state populations with sightings, applying a heatmap and marking USA airforce bases and likewise looking at the time of day of said sightings. We have been able to say a lot about the tendencies in the increases of sightings.</p>
 <p>What is still missing? What could be improved?, Why?</p>
 <p>Further analysis into the data s.t. applying NLP (Natural Language Processing) to work with the comments people came with for their sightings. This would have opened a lot of doors, as the comments might have given some qualitative data that we cant just extrapolate from atributes such as date, location, shape etc.</p>
 <p>One of the main problems is that we do not present anything 100% conclusive in the data. Since a lot of the data can be explained simply by the fact that the more people increase the number of sightings. Therefore it is hard to conclude anything in regards to things like airforce bases and hour of the day. It just also kinda difficult when working with social data to say anything simple. Since it often hugely complex why things like UFO sightings increase.</p>
-</section>
-<section id="contributions.-who-did-what" class="level3">
-<h3 class="anchored" data-anchor-id="contributions.-who-did-what">Contributions. Who did what?</h3>
-<p>You should write (just briefly) which group member was the main responsible for which elements of the assignment. (I want you guys to understand every part of the assignment, but usually there is someone who took lead role on certain portions of the work. That’s what you should explain). It is not OK simply to write “All group members contributed equally”. Make sure that you use references when they’re needed and follow academic standards.</p>
+###
+<center>
+Contributions
+</center>
+<p>We write the contributions as in the table below to. Everyone has done some part in each section but for each section someone took a lead role, which is shown in the table below</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Section</th>
+<th>s224409 (%)</th>
+<th>s224369 (%)</th>
+<th>s224394 (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Introduction</td>
+<td>40</td>
+<td>30</td>
+<td>30</td>
+</tr>
+<tr class="even">
+<td>Time Series Plot</td>
+<td>25</td>
+<td>50</td>
+<td>25</td>
+</tr>
+<tr class="odd">
+<td>Hour of the Day</td>
+<td>35</td>
+<td>35</td>
+<td>30</td>
+</tr>
+<tr class="even">
+<td>Heatmap</td>
+<td>50</td>
+<td>25</td>
+<td>25</td>
+</tr>
+<tr class="odd">
+<td>Correlation Between</td>
+<td>25</td>
+<td>25</td>
+<td>50</td>
+</tr>
+<tr class="even">
+<td>Conclusion</td>
+<td>25</td>
+<td>35</td>
+<td>40</td>
+</tr>
+</tbody>
+</table>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

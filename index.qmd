@@ -8,6 +8,7 @@ format:
     code-fold: true
 jupyter: python3
 ---
+
 Since the early 20th century, people have looked to the skies and reported strange lights, mysterious shapes, and encounters they could not explain. UFO sightings have quietly woven themselves into modern folklore. This project sets out to explore those sightings, not to prove the existence of otherworldly visitors, but to understand what might be driving these reports here on Earth. Instead of exploring, What did they see?, we are asking, Why did they see it? And since the overwhelming majority of sightings come from the United States a curious detail in itself that’s where we focus.
 
 ### UFO sightings over time
