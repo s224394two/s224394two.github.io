@@ -8,7 +8,7 @@ format:
     code-fold: true
 jupyter: python3
 ---
-Since the beginning of the 20th century we have reported UFO sightings. What this project is trying to do is to look at the trend of the UFO sightings and try to explain them in a way which is not attributed to an increase in actual UFOs. Since a major part of the sightings are in the US (which already indicates that something weird is up) we are only focusing on that part of the data.
+Since the early 20th century, people have looked to the skies and reported strange lights, mysterious shapes, and encounters they could not explain. UFO sightings have quietly woven themselves into modern folklore. This project sets out to explore those sightings, not to prove the existence of otherworldly visitors, but to understand what might be driving these reports here on Earth. Instead of exploring, What did they see?, we are asking, Why did they see it? And since the overwhelming majority of sightings come from the United States a curious detail in itself that’s where we focus.
 
 ### UFO sightings over time
 The first thing we want to examine is the trend of UFO sightings over the years. We choose to look at only the sightings from 1990 and further since the number of sightings is fairly low up until that point and therefore there is no meaningful insight to gain. We also look at the particular shapes of sighings and lastly we plotted some important UFO related media too see if they might contribute to the increase.
