@@ -326,22 +326,9 @@ The peak around 2012–2013 may be attributed to a combination of cultural and t
 
 The plot also includes a frequency distribution of reported UFO shapes between 1990 and 2014. While most shapes appear consistently reported over time, there is a noticeable spike in reports of “unknown” shapes around 1995. This anomaly suggests a temporary increase in sightings where witnesses were unable or unwilling to classify the object’s form, possibly due to ambiguity in observations or growing public discourse about UFOs during that period.
 
-To understand the broader pattern of increasing sightings from the 1990s to the early 2010s, one must consider external societal trends. Data from the International Civil Aviation Organization (ICAO) suggest a steady increase in global air traffic, as indicated by rising Revenue Passenger-Kilometres (RPKs). Although the data do not directly reflect the number of flights, they imply a growing presence of aerial vehicles in the skies, which may increase the likelihood of misidentifying conventional aircraft as unidentified flying objects.
+To understand the broader pattern of increasing sightings from the 1990s to the early 2010s, one must consider external societal trends. Data from the International Civil Aviation Organization (ICAO)@icao_world_economy suggest a steady increase in global air traffic, as indicated by rising Revenue Passenger-Kilometres (RPKs). Although the data do not directly reflect the number of flights, they imply a growing presence of aerial vehicles in the skies, which may increase the likelihood of misidentifying conventional aircraft as unidentified flying objects.
 
-Additionally, the influence of pop culture is clearly visible. Markers on the time-series plot indicate the release of major alien-themed media, such as The X-Files and Independence Day. These releases coincide with noticeable spikes in UFO sightings, suggesting that media exposure may influence public perception and increase observational activity. This idea is supported by a CBC article titled “Record British UFO sightings in 1990s,” which asserts that such media events raise public awareness and curiosity, leading to more frequent UFO reports.
-Kilder:
-
-https://www.astronomy.com/science/reports-of-rising-ufo-sightings-are-greatly-exaggerated/
-
-https://en.wikipedia.org/wiki/Nibiru_cataclysm (ift Planet X i 2012)
-
-https://www.icao.int/sustainability/pages/facts-figures_worldeconomydata.aspx
-
-https://www.cbc.ca/news/world/record-british-ufo-sightings-in-1990s-1.817993
-
-
-
-
+Additionally, the influence of pop culture is clearly visible. Markers on the time-series plot indicate the release of major alien-themed media, such as The X-Files and Independence Day. These releases coincide with noticeable spikes in UFO sightings, suggesting that media exposure may influence public perception and increase observational activity. This idea is supported by a CBC article titled “Record British UFO sightings in 1990s” @cbc_british_ufo_sightings which asserts that such media events raise public awareness and curiosity, leading to more frequent UFO reports.
 
 ### Hour of the day
 ```{python}
@@ -374,7 +361,7 @@ plt.xlim(0,24)
 plt.xlabel('Hour of the Day')
 plt.show()
 ```
-**Figure 3:** This figure shows the the number of sightings per hour. It is clear that the sightings are mostly a thing of the evening/night. This also makes sense considering that a lot of the sigtings are light.
+**Figure 3:** This figure shows the the number of sightings per hour. It is clear that the sightings are mostly a thing of the evening/night. This also makes sense considering that a lot of the sightings are light.
 
 What happens when we shift our focus to when these sightings occur throughout the day?
 
@@ -553,12 +540,11 @@ map_hooray
 ```
 **Figure 4:** The heatmap shows looks at the locations of the reported sightnings. We have included the location of different military air force bases. It seems that there often are a lot of sightings around big cities which also sometimes have airforce bases. But sometimes places where there is only airforce bases also sees an increase in sightings
 
-Figure 4 reveals a clear pattern: regions in proximity to active airbases tend to exhibit a high density of UFO sightings. One plausible explanation is that these sightings may, in fact, correspond to military aircraft activity. Given that military aircraft are routinely operated near their bases regardless of weather conditions or time of day it is not unreasonable to assume that experimental or unfamiliar aircraft flying at night could be mistaken for unidentified flying objects by unsuspecting observers. Since airbases are geographically fixed, such misidentifications would naturally accumulate in the same locations over time, resulting in noticeable clusters of sightings. 
+Figure 4 reveals a clear pattern: regions in proximity to active airbases tend to exhibit a high density of UFO sightings. One plausible explanation is that these sightings may, in fact, correspond to military aircraft activity. Given that military aircraft are routinely operated near their bases regardless of weather conditions or time of day it is not unreasonable to assume that experimental or unfamiliar aircraft flying at night could be mistaken for unidentified flying objects by unsuspecting observers. Since airbases are geographically fixed, such misidentifications would naturally accumulate in the same locations over time, resulting in noticeable clusters of sightings. This is also what we see in some of the states with low population but still fine number of UFO sightings. 
 
 Another notable observation from Figure 4 is the clear disparity in the density and distribution of UFO sightings between the eastern and western regions of the United States. Sightings appear to be significantly more frequent in the east, where high density areas form a nearly continuous band across much of the region. This pattern is especially pronounced around major metropolitan centers such as New York, Chicago, and Washington, D.C, where sightings are heavily clustered. In contrast, the western United States shows a markedly different pattern. Sightings in this region are largely confined to the coasts and major urban centers, including cities like Los Angeles and San Francisco. Vast interior areas of the west, including parts of the Rocky Mountains and Great Basin, exhibit little to no reported activity.
 
-We suspect the reason between this great disparity, is most likely population size and density. As we mentioned two large areas of the west ie. The Rocky Mountains and Great Basin has almost no sightings reported. These two areas are also very sparsely populated, while coastal and urban centers such as Los Angeles, San Francisco, Seattle, Salt Lake City and Denver still report large amounts of sightings. This could indicate that reported UFO sightings are correlated with population size. We do also see some places with low population. In the less populated places we still see a fair amount of sightings which we then in turn might attribute to the military bases.
-
+We suspect the reason between this great disparity, is most likely population size and density. As we mentioned two large areas of the west ie. The Rocky Mountains and Great Basin has almost no sightings reported. These two areas are also very sparsely populated, while coastal and urban centers such as Los Angeles, San Francisco, Seattle, Salt Lake City and Denver still report large amounts of sightings. This could indicate that reported UFO sightings are correlated with population size and maybe not so much correlated with military bases. It is also a bit difficult to see this since a lot of the military bases are around cities. We still see states with low population, which has spikes of sightings around military bases but not a significant amount enough to be conclusive about.
 
 
 ### Correlation between 
@@ -795,9 +781,9 @@ This trend may be attributed to the growing influence of popular culture during 
 
 It is plausible that in the earlier decades, individuals were more hesitant to report sightings due to fear of ridicule or disbelief. As cultural perceptions shifted and UFO phenomena became more widely discussed and accepted, people may have felt more comfortable coming forward with their observations. Thus, the strengthening correlation over time could reflect not only population growth but also a growing willingness to report sightings, influenced by evolving social and cultural attitudes. 
 
-The previously mentioned factors help explain the overall increase in reported UFO sightings but do not fully account for the growing correlation between population size and sightings over time. To better understand this trend, it is useful to consider how observation conditions vary with geography. Interestingly, some of the best locations in the United States for observing the night sky are in sparsely populated areas, particularly in the western region. According to World Atlas (https://www.worldatlas.com/places/the-best-us-locations-for-unobstructed-night-sky-viewing.html), four out of the six top-rated stargazing locations in the U.S. are in the West, with many of them situated in desert environments. These areas offer minimal light pollution and clear, unobstructed skies ideal conditions for observing aerial activity.
+The previously mentioned factors help explain the overall increase in reported UFO sightings but do not fully account for the growing correlation between population size and sightings over time. To better understand this trend, it is useful to consider how observation conditions vary with geography. Interestingly, some of the best locations in the United States for observing the night sky are in sparsely populated areas, particularly in the western region. According to World Atlas@worldatlas_stargazing, four out of the six top-rated stargazing locations in the U.S. are in the West, with many of them situated in desert environments. These areas offer minimal light pollution and clear, unobstructed skies ideal conditions for observing aerial activity.
 
 This suggests that in the earlier decades of the dataset, sightings may have been more likely to occur in these open and remote areas, where sky visibility is optimal but population density is low. As a result, even though sightings occurred, they were less frequent overall and less likely to be reported or to reflect population trends. Over time, as public interest in UFOs increased and reporting became more socially acceptable, sightings in more populated areas began to rise, thereby increasing the observed correlation with population. Thus, the shift in both where and how often people reported sightings may explain the growing alignment between population size and UFO sighting frequency.
 
 ### Conclusion
-Using the data related to UFO
+We have now looked into the UFO sighting data in order to conclude if it were possible to come up with some explanations for the increase on UFO sightings over the years. We saw that releases such as "independence day" and "x-files" might have an impact since the sighting increased around there time of relesase together with the fact that it makes it more socially acceptable to report UFO sigthings. Another observation was that population and number of sigthigns were greatly correlated and togehter with the fact that most of the sightings were after dark and "light". One then might suspect that a lot of the UFO's where in fact aircrafts. This is even more likely since the number of aircraft over the years has also significantly increased as reported by ICAO. This in turn also explain why there were an increase of sightings around airforce bases. Because of the fact that there often were more densely populated rather than conclusively leading to an increase in sightings which we initally suspected. 
